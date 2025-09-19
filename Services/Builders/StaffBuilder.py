@@ -1,4 +1,4 @@
-from numpy.f2py.auxfuncs import throw_error
+
 
 from Configs.screen_config import VERTICAL_POSITION_BOTTOM, VERTICAL_POSITION_TOP
 from Models import Interval, Rect
@@ -20,6 +20,10 @@ class StaffBuilder:
         self.lines = []
         self.intervals = []
         self.staff = None
+        self.staff_width = None
+        self.staff_top_left = None
+        self.staff_vertical_padding = None
+
 
     def init_staff(self, clef, time_signature, key_signature, staff_vertical_padding, staff_top_left, staff_width):
         self.staff = Staff(clef, time_signature, key_signature)
@@ -38,11 +42,12 @@ class StaffBuilder:
         vertical_positioning: tells if line is above, below (virtual) or on the staff
     """
     def build_lines(self, no_of_lines, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, vertical_positioning):
+
         for i in range(no_of_lines):
-            line_y = (i * interval_thickness)
+            line_y = (i * (interval_thickness + line_thickness))
             start_position = Position(original_position.x, original_position.y + line_y)
             end_position = Position(original_position.x + self.staff_width, original_position.y + line_y)
-            line = Line(start_position, end_position, line_thickness, is_virtual, piano_key_details[i][0], piano_key_details[i][1], vertical_positioning)           
+            line = Line(start_position, end_position, line_thickness, is_virtual, piano_key_details[i][0], piano_key_details[i], vertical_positioning, (i+1))
             self.lines.append(line)
         
         return self
@@ -51,25 +56,27 @@ class StaffBuilder:
         Build intervals based on starting_position. 
         no_of_intervals includes virtual intervals
         interval_thickness: is the height of interval between two lines or line spacing. it's represented by the number of pixes the interval occupies.
-            e.g. y_top: 140 - y_bottom: 149. the difference is 9 but as we count from 140, it is 10 pixels thicknes 
-        line_thickness: tickness of each line on staff
-        piano_key_details: dictionary containing raw_key: realpiano key e.g. ("E", "E4#")
+            e.g. y_top: 140 - y_bottom: 149. the difference is 9 but as we count from 140, it is 10 pixels thickness 
+        line_thickness: thickness of each line on staff
+        piano_key_details: dictionary containing raw_key: real piano key e.g. ("E", "E4#")
         original_position: position where we start all intervals in this call
         is_virtual: tells if interval is virtual or not
         vertical_positioning: tells if interval is above, below (virtual) or on the staff
     """
     def build_intervals(self, no_of_intervals, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, vertical_positioning):
-        interval_offset = interval_thickness - 1
-        cumulative_y_offset = original_position.y - line_thickness
+      #  interval_offset = interval_thickness - 1
+      #  cumulative_y_offset = original_position.y - line_thickness
 
-        for i in range(no_of_intervals):                        
-            cumulative_y_offset += line_thickness # add 1 because we start the interval on the next pixel below
-            position_rect = Rect(Position(original_position.x,  cumulative_y_offset), 
-                                 Position(original_position.x + self.staff_width, cumulative_y_offset),
-                             Position(original_position.x + self.staff_width, cumulative_y_offset + interval_offset),
-                             Position(original_position.x, cumulative_y_offset + interval_offset))
-            cumulative_y_offset +=  interval_offset + 1
-            interval = Interval(position_rect, piano_key_details[i][0], piano_key_details[i][1], is_virtual, vertical_positioning)           
+        for i in range(no_of_intervals):
+            interval_top_y = original_position.y + (i * (interval_thickness + line_thickness))
+            interval_y_bottom = interval_top_y + interval_thickness - 1 # remove one cause start position is considered first pixel
+
+            position_rect = Rect(Position(original_position.x, interval_top_y),
+                                 Position(original_position.x + self.staff_width, interval_top_y),
+                             Position(original_position.x + self.staff_width, interval_y_bottom),
+                             Position(original_position.x, interval_y_bottom))
+
+            interval = Interval(position_rect, piano_key_details[i][0], piano_key_details[i], is_virtual, vertical_positioning, (i+1))
             self.intervals.append(interval)
         
         return self
@@ -78,16 +85,15 @@ class StaffBuilder:
         A virtual interval is that holds extra notes above or below the staff.
         This function builds Virtual intervals based on starting_position on a specific staff.        
         interval_thickness: is the height of interval between two lines or line spacing. it's represented by the number of pixes the interval occupies.
-            e.g. y_top: 140 - y_bottom: 149. the difference is 9 but as we count from 140, it is 10 pixels thicknes 
-        line_thickness: tickness of each line on staff
-        piano_key_details: dictionary containing raw_key: realpiano key e.g. ("E", "E4#")
+            e.g. y_top: 140 - y_bottom: 149. the difference is 9 but as we count from 140, it is 10 pixels thickness 
+        line_thickness: thickness of each line on staff
+        piano_key_details: dictionary containing raw_key: real piano key e.g. ("E", "E4#")
         original_position: position where we start all interval in this call. It must be the top_left of staff or bottom_left of staff based on vertical_positioning
         is_virtual: tells if interval is virtual or not
         vertical_positioning: tells if interval is above, below (virtual) or on the staff
         staff_offset_margins_y: specifies how many pixes we can place virtual lines and intervals above/below staff. for 5 intervals, pass 5 * interval_tickness
     """
-    def build_virtual_intervals(self, interval_thickness, line_thickness, piano_key_details, original_position, vertical_positioning, staff_offset_margins_y):
-        no_of_intervals = staff_offset_margins_y // interval_thickness
+    def build_virtual_intervals(self, interval_thickness, line_thickness, piano_key_details, original_position, vertical_positioning, no_of_intervals):
         self.build_intervals(no_of_intervals, interval_thickness, line_thickness, piano_key_details, original_position,
                              True, vertical_positioning)
         
@@ -102,11 +108,10 @@ class StaffBuilder:
        vertical_positioning: tells if line is above, below (virtual) or on the staff
        staff_offset_margins_y: specifies how many pixes we can place virtual lines and intervals above/below staff. for 5 lines, pass 5 * interval_thickness
     """
-    def build_virtual_lines(self, interval_thickness, line_thickness, piano_key_details, original_position, vertical_positioning, staff_offset_margins_y):
-        y_offset = StaffBuilder.work_out_offset_y(vertical_positioning, original_position, staff_offset_margins_y)
-        no_of_lines = staff_offset_margins_y // interval_thickness
-        self.build_lines(no_of_lines, interval_thickness, line_thickness, piano_key_details, Position(original_position.x, y_offset),
-                             True, vertical_positioning)
+    def build_virtual_lines(self, interval_thickness, line_thickness, piano_key_details, original_position, vertical_positioning, staff_offset_margins_y, no_of_lines):
+       # y_offset = StaffBuilder.work_out_offset_y(vertical_positioning, original_position, staff_offset_margins_y)
+        self.build_lines(no_of_lines, interval_thickness, line_thickness, piano_key_details, original_position,
+                         True, vertical_positioning)
 
         return self
 
@@ -118,7 +123,7 @@ class StaffBuilder:
             y_offset = original_position.y + staff_offset_margins_y
         else:
             y_offset = 0
-            throw_error(f"Invalid vertical_positioning for build_virtual_intervals(): {vertical_positioning}")
+            raise Exception(f"Invalid vertical_positioning for build_virtual_intervals(): {vertical_positioning}")
 
         # make sure offset is not negative as this will corrupt calculations. i.e. the offset that is not on the staff
         if y_offset < 0:
@@ -133,24 +138,23 @@ class StaffBuilder:
         self.staff.lines = [line for line in self.lines if not line.is_virtual]
         self.staff.virtual_lines = [line for line in self.lines if line.is_virtual]
         self.staff.intervals = [interval for interval in self.intervals if not interval.is_virtual]   
-        self.staff.virtual_intervals = [interval for interval in self.intervals if interval.is_virtual]  
+        self.staff.virtual_intervals = [interval for interval in self.intervals if interval.is_virtual]
+        return self.staff
     
 
     """
         Builds staff bounding coordinates.
         We calculate staff boundaries with real lines not virtual ones.
     """
-    def set_position(self, all_lines):
-        normal_lines = [line for line in all_lines if not line.is_virtual]        
-        self.top_line = normal_lines[0]
-        self.bottom_line = normal_lines[-1]
-        self.position_rect = Rect((self.top_line.start_position.x, self.top_line.start_position.y), (self.top_line.end_position.x, self.top_line.end_position.y),
-                                   (self.bottom_line.start_position.x, self.bottom_line.start_position.y), (self.bottom_line.end_position.x, self.bottom_line.end_position.y))       
-        self.top_position = self.top_line.start_position
-        self.bottom_position = self.bottom_line.start_position
+    def set_position(self):
+        normal_lines = [line for line in self.lines if not line.is_virtual]
+        self.staff.top_line = normal_lines[0]
+        self.staff.bottom_line = normal_lines[-1]
+        self.staff.position_rect = Rect(self.staff.top_line.start_position,  self.staff.top_line.end_position,
+                                        self.staff.bottom_line.end_position, self.staff.bottom_line.start_position)
+        self.staff.top_position = self.staff.top_line.start_position
+        self.staff.bottom_position = self.staff.bottom_line.start_position
         
 
-    def set_position_attributes(self):
-        pass
 
     

@@ -1,5 +1,6 @@
 class Line:
     is_virtual = False
+    staff_index = None
     vertical_positioning = 0
     start_position = None
     end_position = None
@@ -8,7 +9,8 @@ class Line:
     notes = []
     thickness = None
 
-    def __init__(self, start_position, end_position, thickness, is_virtual, key, key_id,  vertical_positioning):
+    def __init__(self, start_position, end_position, thickness, is_virtual, key, key_id, vertical_positioning, staff_index):
+        self.staff_index = staff_index
         self.start_position = start_position
         self.end_position = end_position
         self.thickness = thickness
@@ -19,3 +21,6 @@ class Line:
 
     def add_note(self, note):
         self.notes.append(note)
+
+    def __str__(self):
+        return f"\n{"Virtual " if self.is_virtual else ""}Line #{self.staff_index} - Thickness: {self.thickness} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Start: {self.start_position.x, self.start_position.y} - End: {self.end_position.x, self.end_position.y}"

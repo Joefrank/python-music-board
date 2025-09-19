@@ -1,11 +1,36 @@
+from dataclasses import dataclass
+from typing import Tuple
 
-main_window_settings = {
-    "BACKGROUND_COLOR": (250, 230, 240),
-    "TEXT_COLOR": (220, 230, 240),
-    "STAFF_COLOR": (20, 20, 20),
-    "NOTE_COLOR": (180, 130, 70)
-}
+@dataclass
+class WindowConfig:
+    """Window configuration settings."""
+    WIDTH: int = 1200
+    HEIGHT: int = 800
+    CAPTION: str = "AI Piano Music Board"
+    BACKGROUND_COLOR: Tuple[int, int, int] = (250, 250, 250)
+    RESIZABLE: bool = True
 
+@dataclass
+class StaffConfig:
+    """Staff configuration settings."""
+    STAFF_WIDTH_PERCENT: int = 90
+    STAFF_LINE_GAP: int = 10
+    STAFF_LINE_THICKNESS: int = 1
+    STAFF_SPACING: int = 160  # space between two staves within grandstaff
+    STAFF_CLEF_LEFT: int =  20
+    STAFF_NO_LINES: int =  5
+    STAFF_NO_INTERVALS: int =  4
+    STAFF_RIGHT_PADDING:  int = 10
+    STAFF_ALLOWED_MARGIN: int =  50
+    STAFF_NOTE_SIZE:  int = 40
+    STAFF_NOTE_STEM_SIZE: int =  30
+    STAFF_ORIGINAL_Y_OFFSET: int = 155 # this is where the first staff will be placed. all subsequent will be calculated from this
+    VIRTUAL_LINE_WIDTH:  int = 20
+
+@dataclass
+class GenericConfig:
+    BRAVURA_FONT_PATH = "fonts/Bravura.otf"
+    
 staff_generic_settings = {
     "STAFF_LINE_GAP": 10,
     "STAFF_LINE_THICKNESS": 1,

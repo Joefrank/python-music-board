@@ -31,12 +31,25 @@ class Staff:
     def __init__(self, clef, time_signature, key_signature):
         self.clef = clef
         self.time_signature = time_signature
-        self.key_signature = key_signature  
+        self.key_signature = key_signature
 
     def set_notes_boundaries(self, left, top, right, bottom):
         self.notes_left_offset = left
         self.notes_right_offset = right
         self.notes_top_offset = top
         self.notes_bottom_offset = bottom
+
+    def __str__(self):
+        lines_str = "-> ".join(str(line) for line in self.lines)
+        intervals_str = "-> ".join(str(interval) for interval in self.intervals)
+        virtual_lines_str = "-> ".join(str(line) for line in self.virtual_lines)
+        virtual_intervals_str = "-> ".join(str(interval) for interval in self.virtual_intervals)
+
+        return (f"clef: {self.clef} - time_signature: {self.time_signature} - key_signature: {self.key_signature} - "
+                f"Top:{self.top_position.x, self.top_position.y} - Bottom:{self.bottom_position.x, self.bottom_position.y} -"
+                f"\n- lines: [{lines_str}]" 
+                f"\n- Virtual lines: [{virtual_lines_str}]" 
+                f"\n- intervals: [{intervals_str}]"
+                f"\n- Virtual intervals: [{virtual_intervals_str}]")
 
 

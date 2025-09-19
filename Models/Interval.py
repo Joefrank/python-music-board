@@ -5,8 +5,10 @@ class Interval:
     key = None
     key_id = None
     notes = []
+    staff_index = None
 
-    def __init__(self, position_rect, key, key_id, is_virtual, vertical_positioning):
+    def __init__(self, position_rect, key, key_id, is_virtual, vertical_positioning, staff_index):
+        self.staff_index = staff_index
         self.position_rect = position_rect
         self.key = key
         self.key_id = key_id
@@ -17,7 +19,12 @@ class Interval:
         self.notes.append(note)
 
     """
-        Thickness will be highest y - lowest y + 1 because we count tickness as no of pixels. e.g. 140 to 149
+        Thickness will be highest y - lowest y + 1 because we count thickness as no of pixels. e.g. 140 to 149
     """
-    def get_tickness(self):
-        return (self.position_rect.bottom_left.y - self.position_rect.top_left.y + 1)
+    def get_thickness(self):
+        return self.position_rect.bottom_left.y - self.position_rect.top_left.y + 1
+
+    def __str__(self):
+        return (f"\n{"Virtual " if self.is_virtual else ""}Interval #{self.staff_index} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Top-Left{self.position_rect.top_left.x, self.position_rect.top_left.y} - Top-Right: {self.position_rect.top_right.x, self.position_rect.top_right.y} "
+                f"- Bottom-Left: {self.position_rect.bottom_left.x, self.position_rect.bottom_left.y} - Bottom-Right: {self.position_rect.bottom_right.x, self.position_rect.bottom_right.y}"
+                )

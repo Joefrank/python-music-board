@@ -44,7 +44,6 @@ class TestStaffBuilder(unittest.TestCase):
         self.assertTrue(all(line.vertical_positioning == VERTICAL_POSITION_ON for line in staff_builder.lines))
         # check thickness
         self.assertTrue(all(line.thickness == line_thickness for line in staff_builder.lines))
-        
 
     def test_build_top_virtual_lines(self):
         # Arrange        
@@ -126,7 +125,6 @@ class TestStaffBuilder(unittest.TestCase):
         self.assertTrue(all(line.vertical_positioning == VERTICAL_POSITION_BOTTOM for line in staff_builder.lines))
         # check thickness
         self.assertTrue(all(line.thickness == line_thickness for line in staff_builder.lines))
-
 
     def test_build_intervals(self):
         # Arrange

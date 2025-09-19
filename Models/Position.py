@@ -37,3 +37,6 @@ class Position:
     """
     def belongs_to_interval(self, interval):
         return self.is_within_rectangle(interval.position_rect)
+
+    def __str__(self):
+        return f"Position:({self.x},{self.y})"

@@ -1,18 +1,31 @@
 
 """Main entry point for the AI Music Board application."""
-
-import sys
+from Models.exceptions import MusicBoardApplicationError
+from music_board_application import MusicBoardApplication
 import logging
+import sys
 
-from Services.Builders import StaffBuilder
-from Models.Line import Line
-from Configs.screen_config import VERTICAL_POSITION_TOP
 
 def main():
     """Main entry point."""
-    #app = StaffBuilder(clef, time_signature, key_signature, staff_offset, staff_top_left, staff_width)  
-    print(f'services test{VERTICAL_POSITION_TOP}')
-    pass
+    logger = logging.getLogger(__name__)
+    app = None
+    try:
+        app = MusicBoardApplication()
+        app.initialize()
+        app.run()
+    except MusicBoardApplicationError as e:
+        logger.error(f"Application error: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        sys.exit(1)
+    finally:
+        if app:
+            app.cleanup()
+
+
+
 
 if __name__ == "__main__":
     main()
