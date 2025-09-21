@@ -2,7 +2,6 @@ import pygame
 from datetime import datetime
 from Models.Position import Position
 from Configs.music_config import supported_clef_settings, supported_time_signatures, supported_modulations
-
 from Configs.screen_config import GenericConfig, StaffConfig, staff_generic_settings
 from Services.Utils import StaffUtils
 
@@ -14,21 +13,29 @@ class StaffRenderer:
         self.STAFF_ITEM_LINE = 0
         self.STAFF_ITEM_INTERVAL = 1
 
-    def render_staff(self, staff, screen):       
+    def render_grand_staff(self, grand_staff, screen):
+        previous_staff = None
+        for staff in grand_staff.staves:
+            self.render_staff(staff, screen)
+            if previous_staff is not None:
+                self.bind_staves(previous_staff, staff, screen)
+            previous_staff = staff
+
+    def bind_staves(self, top_staff, bottom_staff, screen):
+        self.draw_line_from_point(top_staff.top_position, bottom_staff.top_position, screen, thickness=2)
+
+    def render_staff(self, staff, screen): 
         for line in staff.lines:
             self.draw_line(line, screen)
-        self.draw_staff_boundaries(staff, screen)
+        self.draw_staff_boundaries(staff, screen)        
         clef_position = self.draw_staff_clef(screen, staff)
-        print(f"Cleff position:{clef_position}")
-        time_numerator, time_denominator = self.draw_time_signature(screen, staff.time_signature, Position(clef_position.x + 40, staff.top_position.y))
-        print(f"time numerator: {time_numerator}")
-        key_signature_position = Position(time_numerator[0] + 20, time_numerator[1])
-        self.draw_key_signature(staff, screen, key_signature_position)
-        
-        print(clef_position)
-        
+        #print(f"clef position: {clef_position}")
+        key_signature_position = Position(clef_position.x + 20, clef_position.y)
+        last_offset_x = self.draw_key_signature(staff, screen, key_signature_position)
+        time_numerator, time_denominator = self.draw_time_signature(screen, staff.time_signature, Position(last_offset_x + 30, staff.top_position.y))
+               
     def draw_staff_boundaries(self, staff, screen):
-        print(f"{staff.position_rect}")
+        #print(f"{staff.position_rect}")
         self.draw_line_from_point(staff.position_rect.top_left, staff.position_rect.bottom_left, screen, thickness=2)
         self.draw_line_from_point(staff.position_rect.top_right, staff.position_rect.bottom_right, screen, thickness=2)
     

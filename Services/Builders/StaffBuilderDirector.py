@@ -1,5 +1,6 @@
 
 from Configs.screen_config import (VERTICAL_POSITION_BOTTOM, VERTICAL_POSITION_ON, VERTICAL_POSITION_TOP)
+from Models import GrandStaff
 from Models.Position import Position
 from Services.Builders import StaffBuilder
 from Services.Builders.StaffNoteBuilder import StaffNoteBuilder
@@ -41,8 +42,7 @@ class StaffBuilderDirector:
         staff_note_items, staff_note_top_items, staff_note_bottom_item = self.staff_note_builder.build_staff_notes(clef, key_signature, possible_no_oftop_lines_and_intervals)
 
         # this gives the total number of lines and intervals we can fit in the staff_offset_margins_y
-        # Build all lines and intervals above the staff
-        #print(f"position y: {staff_original_position.y} - possible_staff_padding: {possible_staff_padding} - possible_no_oftop_lines_and_intervals: {possible_no_oftop_lines_and_intervals}")
+        # Build all lines and intervals above the staff        
         original_position = Position(staff_original_position.x, staff_original_position.y - possible_staff_padding)        
         #print(f"original_position VL-top: {original_position.x, original_position.y}")
         self.staff_builder.build_virtual_lines(self.interval_thickness, self.line_thickness, staff_note_top_items[1], original_position,
@@ -56,17 +56,46 @@ class StaffBuilderDirector:
         #print(f"original_position Lines: {original_position.x, original_position.y}")
         self.staff_builder.build_lines(self.staff_no_lines, self.interval_thickness, self.line_thickness, staff_note_items[1], original_position, False, VERTICAL_POSITION_ON)
         original_position = Position(staff_original_position.x, staff_original_position.y + self.line_thickness)
-       # print(f"original_position Intervals: {original_position.x, original_position.y}")
+        # print(f"original_position Intervals: {original_position.x, original_position.y}")
         self.staff_builder.build_intervals(self.staff_no_intervals, self.interval_thickness, self.line_thickness, staff_note_items[0], original_position, False, VERTICAL_POSITION_ON)
-        self.staff_builder.set_position() # we can calculate staff boundaries at this stage
-
+                
         # Build all lines and intervals below the staff
-        staff_bottom_line = self.staff_builder.staff.bottom_line # we can now use the staff bottom_line
+        staff_bottom_line = self.staff_builder.get_staff_bottom_line()
+        #staff_bottom_line = self.staff_builder.staff.bottom_line # we can now use the staff bottom_line
         original_position = Position(staff_bottom_line.start_position.x, staff_bottom_line.start_position.y + 1) # + 1 because we want to start at the next pixel after the bottom line thickness
         #print(f"original_position VI-bottom: {original_position.x, original_position.y}")
         self.staff_builder.build_virtual_intervals(self.interval_thickness, self.line_thickness, staff_note_bottom_item[0], original_position, VERTICAL_POSITION_BOTTOM, possible_no_oftop_lines_and_intervals)
         original_position = Position(staff_bottom_line.start_position.x, staff_bottom_line.start_position.y + self.interval_thickness + 1)
        # print(f"original_position VL-bottom: {original_position.x, original_position.y}")
         self.staff_builder.build_virtual_lines(self.interval_thickness, self.line_thickness, staff_note_bottom_item[1], original_position, VERTICAL_POSITION_BOTTOM, possible_staff_padding, possible_no_oftop_lines_and_intervals)
-
-        return self.staff_builder.build_staff()
+        current_staff = self.staff_builder.build_staff()
+        self.staff_builder.set_position() 
+        return current_staff
+    
+    def build_grand_staff(self, staff_original_position, staff_with, StaffConfig, clef_tuple, time_signature, key_signature):
+        original_position = staff_original_position
+        # build the top staff (treble).
+        treble_staff = self.build_staff(clef_tuple[0], time_signature, key_signature,
+                                                           staff_original_position,
+                                                           StaffConfig.STAFF_ALLOWED_MARGIN, staff_with,
+                                                           StaffConfig.STAFF_LINE_GAP,
+                                                           StaffConfig.STAFF_LINE_THICKNESS,
+                                                           StaffConfig.STAFF_SPACING,
+                                                           StaffConfig.STAFF_NO_LINES,
+                                                           StaffConfig.STAFF_NO_INTERVALS)
+        
+        line_with_highest_y = max(treble_staff.virtual_lines, key=lambda line: line.start_position.y)
+        staff_original_position = Position(staff_original_position.x, line_with_highest_y.start_position.y + StaffConfig.STAFF_SPACING)
+        # build bottom staff (bass)
+        bass_staff = self.build_staff(clef_tuple[1], time_signature, key_signature,
+                                                           staff_original_position,
+                                                           StaffConfig.STAFF_ALLOWED_MARGIN, staff_with,
+                                                           StaffConfig.STAFF_LINE_GAP,
+                                                           StaffConfig.STAFF_LINE_THICKNESS,
+                                                           StaffConfig.STAFF_SPACING,
+                                                           StaffConfig.STAFF_NO_LINES,
+                                                           StaffConfig.STAFF_NO_INTERVALS)
+        
+        bottom_virtual_line = max(bass_staff.virtual_lines, key=lambda line: line.end_position.y)
+        grand_staff = GrandStaff([treble_staff, bass_staff], original_position, bottom_virtual_line.end_position)
+        return grand_staff

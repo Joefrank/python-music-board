@@ -24,8 +24,12 @@ class StaffBuilder:
         self.staff_top_left = None
         self.staff_vertical_padding = None
 
-
+    def get_current_staff(self):
+        return self.staff
+    
     def init_staff(self, clef, time_signature, key_signature, staff_vertical_padding, staff_top_left, staff_width):
+        self.lines = []
+        self.intervals = []
         self.staff = Staff(clef, time_signature, key_signature)
         self.staff_vertical_padding = staff_vertical_padding
         self.staff_top_left = staff_top_left
@@ -51,6 +55,19 @@ class StaffBuilder:
             self.lines.append(line)
         
         return self
+
+    """
+        Get the lowest staff line.
+    """
+    def get_staff_bottom_line(self):
+        if len(self.lines) == 0:
+            return
+        return max(
+            (line for line in self.lines if not line.is_virtual),
+            key=lambda line: line.start_position.y,
+            default=None
+        )
+
 
     """
         Build intervals based on starting_position. 
@@ -139,6 +156,7 @@ class StaffBuilder:
         self.staff.virtual_lines = [line for line in self.lines if line.is_virtual]
         self.staff.intervals = [interval for interval in self.intervals if not interval.is_virtual]   
         self.staff.virtual_intervals = [interval for interval in self.intervals if interval.is_virtual]
+        #self.set_position(self.staff)
         return self.staff
     
 
@@ -147,7 +165,7 @@ class StaffBuilder:
         We calculate staff boundaries with real lines not virtual ones.
     """
     def set_position(self):
-        normal_lines = [line for line in self.lines if not line.is_virtual]
+        normal_lines = [line for line in self.staff.lines if not line.is_virtual]
         self.staff.top_line = normal_lines[0]
         self.staff.bottom_line = normal_lines[-1]
         self.staff.position_rect = Rect(self.staff.top_line.start_position,  self.staff.top_line.end_position,

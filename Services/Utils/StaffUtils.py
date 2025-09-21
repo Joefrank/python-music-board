@@ -12,10 +12,10 @@ class StaffUtils:
         return None, None
 
     @staticmethod
-    def resolve_position_with_margins(position, margins):
+    def resolve_position_with_margins(position, margins):       
         x = position.x + margins[0] - margins[2]
-        y = position.y + margins[1] - margins[3]
-        print(f"resolve_position_with_margins: {x,y}")
+        y = position.y + margins[1] - margins[3] 
+        print(f"staff top left:{position} - margin:{margins}")      
         return Position(x, y)
 
     @staticmethod
@@ -62,16 +62,14 @@ class StaffUtils:
         
         y_offset = start_position.y + offset
         x_offset = modulations_x_offset +  (modulation_item_index * (modulation_item_spacing))
-        print(f"get_signature_item_coordinates_for_line: {x_offset, y_offset}")
+        
         return Position(x_offset, y_offset) #, line
 
     @staticmethod
     def calculate_score_dimension(music_score):
         height, width = (0, 0)
         all_staves = music_score.staves_sequence
-        #print(isinstance(all_staves[0], Staff))
-        #print(all_staves)
-       # return None, None
+        
         for staff in all_staves:
             if isinstance(staff, Staff):
                 height += staff.bottom_position.y - staff.top_position.y

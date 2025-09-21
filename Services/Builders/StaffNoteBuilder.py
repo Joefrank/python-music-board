@@ -28,13 +28,25 @@ class StaffNoteBuilder:
         modulations = self.supported_clef_settings[clef]["signature_position_pattern"][key_signature]
         modulated_notes = [list(d.keys())[0] for d in modulations]
         resulting_notes = []
+        unsharpenabled_notes = ['E','B']
+        unflattenable_notes = ['C', 'F']
 
         for note in notes:
-            if note[0] in modulated_notes:
+            note_char1 = note[0]
+            if note_char1 in modulated_notes:                
+                modulation_details = next((d for d in modulations if note[0] in d), None)
                 if modulation_type == MODULATION_SHARP: # modulate note
-                    new_note = f"{note}#"
+                    if note_char1 in unsharpenabled_notes: #we don't sharpen these types, just jump to next note.
+                        new_char1 = modulation_details[note_char1][2]
+                        new_note = new_char1 + note[1:]
+                    else:
+                        new_note = f"{note}#"
                 elif modulation_type == MODULATION_FLAT:
-                    new_note = f"{note}b"
+                    if note_char1 in unflattenable_notes: #we don't flatten these types, just jump to previous note.
+                        new_char1 = modulation_details[note_char1][2]
+                        new_note = new_char1 + note[1:]
+                    else:
+                        new_note = f"{note}b"
                 else:
                     new_note = note
                 resulting_notes.append(new_note)
