@@ -38,5 +38,16 @@ class Position:
     def belongs_to_interval(self, interval):
         return self.is_within_rectangle(interval.position_rect)
 
+    def from_tuple(self, coordinates):
+        self.x = coordinates[0]
+        self.y = coordinates[1]
+        
+    def get_tuple(self):
+        return (self.x, self.y)
+    
+    def copy(self, other_position):
+        self.x = other_position.x
+        self.y = other_position.y
+        
     def __str__(self):
         return f"Position:({self.x},{self.y})"

@@ -13,7 +13,7 @@ class WindowConfig:
 @dataclass
 class StaffConfig:
     """Staff configuration settings."""
-    STAFF_WIDTH_PERCENT: int = 90
+    STAFF_WIDTH_PERCENT: int = 90 # this is a percentage
     STAFF_LINE_GAP: int = 10
     STAFF_LINE_THICKNESS: int = 1
     STAFF_SPACING: int = 160  # space between two staves within grandstaff
@@ -21,10 +21,10 @@ class StaffConfig:
     STAFF_NO_LINES: int =  5
     STAFF_NO_INTERVALS: int =  4
     STAFF_RIGHT_PADDING:  int = 10
-    STAFF_ALLOWED_MARGIN: int =  50
+    STAFF_ALLOWED_MARGIN: int =  55
     STAFF_NOTE_SIZE:  int = 40
     STAFF_NOTE_STEM_SIZE: int =  30
-    STAFF_ORIGINAL_Y_OFFSET: int = 155 # this is where the first staff will be placed. all subsequent will be calculated from this
+    STAFF_ORIGINAL_Y_OFFSET: int = 200 # this is where the first staff will be placed. all subsequent will be calculated from this
     VIRTUAL_LINE_WIDTH:  int = 20
 
 @dataclass

@@ -15,7 +15,7 @@ class StaffUtils:
     def resolve_position_with_margins(position, margins):       
         x = position.x + margins[0] - margins[2]
         y = position.y + margins[1] - margins[3] 
-        print(f"staff top left:{position} - margin:{margins}")      
+        #print(f"staff top left:{position} - margin:{margins}")      
         return Position(x, y)
 
     @staticmethod

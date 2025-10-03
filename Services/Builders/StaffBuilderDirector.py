@@ -1,6 +1,6 @@
 
 from Configs.screen_config import (VERTICAL_POSITION_BOTTOM, VERTICAL_POSITION_ON, VERTICAL_POSITION_TOP)
-from Models import GrandStaff
+from Models import GrandStaff, MusicScore
 from Models.Position import Position
 from Services.Builders import StaffBuilder
 from Services.Builders.StaffNoteBuilder import StaffNoteBuilder
@@ -99,3 +99,11 @@ class StaffBuilderDirector:
         bottom_virtual_line = max(bass_staff.virtual_lines, key=lambda line: line.end_position.y)
         grand_staff = GrandStaff([treble_staff, bass_staff], original_position, bottom_virtual_line.end_position)
         return grand_staff
+    
+    def build_music_Score(self, grand_staff, score_title, score_credits):
+        top_staff = grand_staff.staves[0]
+        staff_width = top_staff.top_line.end_position.x - top_staff.top_line.start_position.x
+        music_score = MusicScore(top_staff.top_position, staff_width, score_title, score_credits)
+        music_score.add_staff(grand_staff)
+
+        return music_score

@@ -11,7 +11,9 @@ class ApplicationState:
     #selected_staff = None
     #last_clicked_position: Optional[Position] = None
     is_running: bool = True
-    #needs_refresh: bool = False
+    needs_refresh: bool = True
+    previous_mouse_over_position: Position = None
+    current_mouse_over_position: Position = None
     #placed_notes: List = field(default_factory=list)
     #error_messages: List[str] = field(default_factory=list)
 
