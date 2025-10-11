@@ -7,7 +7,7 @@ from Models import MusicScore
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.EventHandler import EventHandler
 from Models.exceptions import MusicBoardApplicationError
-from Services.Builders import StaffBuilderDirector
+from Services.Builders import MusicScoreBuilderDirector, StaffBuilderDirector
 from Services.Renderer.StaffRenderer import StaffRenderer
 from Services.Renderer.ScreenRenderer import ScreenRenderer
 from Configs.screen_config import StaffConfig
@@ -23,6 +23,7 @@ class MusicBoardApplication:
         self.logger = logging.getLogger(__name__)        
         self.event_handler = EventHandler(self.state)
         self.staff_builder_director = StaffBuilderDirector()
+        self.score_builder_director = MusicScoreBuilderDirector.MusicScoreBuilderDirector()
         self.music_score = None
 
     def initialize(self) -> None:
@@ -38,8 +39,9 @@ class MusicBoardApplication:
         self.main_canvas = self.screen_renderer.init_screen(window_width, window_height, screen_config.WindowConfig.CAPTION,
                                                     screen_config.WindowConfig.BACKGROUND_COLOR)
         # init the first staff
-        grand_staff, _ = self.init_staffs(window_width, default_time_signature, default_key_signature) 
-        self.music_score = self.staff_builder_director.build_music_Score(grand_staff, score_title, score_credits)        
+        grand_staff = self.init_staffs(window_width, default_time_signature, default_key_signature) 
+        # use first staff to create music score
+        self.music_score = self.score_builder_director.build_score(grand_staff, score_title, score_credits) 
        
         
 
@@ -89,16 +91,12 @@ class MusicBoardApplication:
         except Exception as e:
             self.logger.error(f"Error during cleanup: {e}")
 
-    def init_staffs(self, window_width, time_signature, key_signature):
-        
-        # work out first staff position and width
-        staff_with, staff_original_position = StaffBuilderDirector.calculate_first_staff_position(window_width,
-                                                                                      StaffConfig.STAFF_WIDTH_PERCENT,
-                                                                                      StaffConfig.STAFF_ORIGINAL_Y_OFFSET)
+    """ We initialize the app with only one grand staff."""
+    def init_staffs(self, window_width, time_signature, key_signature):        
         # record this for subsequent operations
-        grand_staff = self.staff_builder_director.build_grand_staff(staff_original_position, staff_with, StaffConfig, 
-                                                                    (TREBLE_CLEF, BASS_CLEF), time_signature, key_signature)
-        return grand_staff, staff_with
+        grand_staff = self.staff_builder_director.build_grand_staff(window_width, StaffConfig, (TREBLE_CLEF, BASS_CLEF), 
+                                                                    time_signature, key_signature)
+        return grand_staff
     
    
         

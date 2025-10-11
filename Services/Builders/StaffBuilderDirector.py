@@ -72,7 +72,13 @@ class StaffBuilderDirector:
         self.staff_builder.set_position() 
         return current_staff
     
-    def build_grand_staff(self, staff_original_position, staff_with, StaffConfig, clef_tuple, time_signature, key_signature):
+    #def build_grand_staff(self, staff_original_position, staff_with, StaffConfig, clef_tuple, time_signature, key_signature):
+    def build_grand_staff(self, window_width, StaffConfig, clef_tuple, time_signature, key_signature):
+        # work out first staff position and width
+        staff_with, staff_original_position = self.calculate_first_staff_position(window_width,
+                                                                                      StaffConfig.STAFF_WIDTH_PERCENT,
+                                                                                      StaffConfig.STAFF_ORIGINAL_Y_OFFSET)
+        
         original_position = staff_original_position
         # build the top staff (treble).
         treble_staff = self.build_staff(clef_tuple[0], time_signature, key_signature,
@@ -104,6 +110,7 @@ class StaffBuilderDirector:
         top_staff = grand_staff.staves[0]
         staff_width = top_staff.top_line.end_position.x - top_staff.top_line.start_position.x
         music_score = MusicScore(top_staff.top_position, staff_width, score_title, score_credits)
+        music_score.build_credits();
         music_score.add_staff(grand_staff)
 
         return music_score

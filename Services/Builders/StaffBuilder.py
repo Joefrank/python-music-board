@@ -46,6 +46,9 @@ class StaffBuilder:
         vertical_positioning: tells if line is above, below (virtual) or on the staff
     """
     def build_lines(self, no_of_lines, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, vertical_positioning):
+        #because we are starting to build lines from top to bottom and our key details are
+        # from bottom to top, we need to reverse the array.
+        piano_key_details.reverse()  
 
         for i in range(no_of_lines):
             line_y = (i * (interval_thickness + line_thickness))
@@ -81,8 +84,9 @@ class StaffBuilder:
         vertical_positioning: tells if interval is above, below (virtual) or on the staff
     """
     def build_intervals(self, no_of_intervals, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, vertical_positioning):
-      #  interval_offset = interval_thickness - 1
-      #  cumulative_y_offset = original_position.y - line_thickness
+        # because we are starting to build lines from top to bottom and our key details are
+        # from bottom to top, we need to reverse the array.
+        piano_key_details.reverse()  
 
         for i in range(no_of_intervals):
             interval_top_y = original_position.y + (i * (interval_thickness + line_thickness))
@@ -126,7 +130,7 @@ class StaffBuilder:
        staff_offset_margins_y: specifies how many pixes we can place virtual lines and intervals above/below staff. for 5 lines, pass 5 * interval_thickness
     """
     def build_virtual_lines(self, interval_thickness, line_thickness, piano_key_details, original_position, vertical_positioning, staff_offset_margins_y, no_of_lines):
-       # y_offset = StaffBuilder.work_out_offset_y(vertical_positioning, original_position, staff_offset_margins_y)
+       
         self.build_lines(no_of_lines, interval_thickness, line_thickness, piano_key_details, original_position,
                          True, vertical_positioning)
 

@@ -48,6 +48,20 @@ class Position:
     def copy(self, other_position):
         self.x = other_position.x
         self.y = other_position.y
-        
+
+    def translateTo(self, position):
+        self.x += position.x
+        self.y += position.y
+
+    def translateTo(self, x, y):
+        self.x += x
+        self.y += y
+
+    def is_above_position(self, position):
+        return self.y < position.y
+    
+    def is_below_position(self, position):
+        return self.y > position.y
+    
     def __str__(self):
         return f"Position:({self.x},{self.y})"

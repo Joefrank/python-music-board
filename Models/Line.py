@@ -26,5 +26,11 @@ class Line:
         return ((self.start_position.x <= position.x <= self.end_position.x and position.y == self.start_position.y)
         or (self.start_position.y <= position.y <= self.end_position.y and position.x == self.start_position.x))
 
+    def is_above_position(self, position):
+        return self.start_position.y < position.y and self.end_position.y < position.y
+    
+    def is_below_position(self, position):
+        return self.start_position.y > position.y and self.end_position.y > position.y
+
     def __str__(self):
         return f"\n{"Virtual " if self.is_virtual else ""}Line #{self.staff_index} - Thickness: {self.thickness} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Start: {self.start_position.x, self.start_position.y} - End: {self.end_position.x, self.end_position.y}"

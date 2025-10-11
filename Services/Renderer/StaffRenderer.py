@@ -1,66 +1,28 @@
 import pygame
 import math
 from datetime import datetime
-from Models import GrandStaff, MusicScore
+from Models import GrandStaff, Interval, MusicScore
+from Models.Line import Line
 from Models.Position import Position
 from Configs.music_config import supported_clef_settings, supported_time_signatures, supported_modulations
 from Configs.screen_config import GenericConfig, StaffConfig, staff_generic_settings
 from Models.Staff import Staff
+from Services.Renderer.BaseRenderer import BaseRenderer
 from Services.Utils import StaffUtils
 
 
-class StaffRenderer:
+class StaffRenderer(BaseRenderer):
 
     def __init__(self, state):
+        super().__init__(state) 
         self.start_time = datetime.now().time()        
         self.MODULATION_SPACING = 6
         self.STAFF_ITEM_LINE = 0
         self.STAFF_ITEM_INTERVAL = 1
         self.music_score = None
-        self.state = state
+        #self.state = state
         self.Grey = (100, 100, 100)
-        
-    def render_music_score(self, screen, music_score):
-        for staff in music_score.staves_sequence:
-            if  isinstance(staff, GrandStaff):
-                self.render_grand_staff(staff, screen)
-            elif isinstance(staff, Staff):
-                self.render_staff(staff, screen)
-        highest_y_offset = self.render_score_credit(screen, music_score)
-        position = Position(music_score.top_left_position.x, highest_y_offset - 60)
-        self.render_score_title(music_score.title, position, music_score.score_width, screen)
-    
-    def render_score_credit(self, screen, score):
-        score_credit = score.credits
-        top_left = score.top_left_position
-        score_width = score.score_width
-        column_width = math.ceil(score_width / len(score_credit))
-        no_of_columns = len(score_credit)
-        font_size = 20
-        highest_y_offset = top_left.y # this is used to set title position
-
-        for i in range(no_of_columns):           
-            score_credit[i].reverse()
-            reversed_array = score_credit[i]
-            if i == no_of_columns -1: # align text to right in this case
-                text_alignment="RIGHT"
-                x_offset = top_left.x + score_width
-            else:
-                text_alignment="LEFT"
-                x_offset = top_left.x + (i * column_width)
-
-            for y in range(len(reversed_array)): 
-                position = Position(x_offset, top_left.y - (y * font_size) - 30)  
-                if position.y < highest_y_offset:
-                    highest_y_offset = position.y             
-                self.draw_text(screen, reversed_array[y], position, font_size, text_alignment=text_alignment)
-                
-        return highest_y_offset
-    
-    def render_score_title(self, title, position, container_width, screen):
-        font_size = 40
-        self.draw_text(screen, title, position, font_size, container_width, text_alignment="CENTER")
-
+      
     def render_grand_staff(self, grand_staff, screen):
         previous_staff = None
         for staff in grand_staff.staves:
@@ -72,70 +34,109 @@ class StaffRenderer:
     def bind_staves(self, top_staff, bottom_staff, screen):
         self.draw_line_from_point(top_staff.top_position, bottom_staff.top_position, screen, thickness=2)
 
-    def render_staff(self, staff, screen): 
+    """
+        Renders all items like notes on lines and intervals
+    """
+    def render_staff_all_collaterals(self, screen, staff):
         for line in staff.lines:
             self.draw_line(line, screen)            
-            self.draw_line_collaterals(screen, line)
+            self.draw_staff_item_collaterals(screen, line)
 
+        for interval in staff.intervals:
+            self.draw_staff_item_collaterals(screen, interval)
+
+        for line in staff.virtual_lines:
+            self.draw_staff_item_collaterals(screen, line, nearest_staff=staff)            
+
+        for interval in staff.virtual_intervals:
+            self.draw_staff_item_collaterals(screen, interval, nearest_staff=staff)
+
+
+    def render_staff(self, staff, screen): 
         self.draw_staff_boundaries(staff, screen)        
         clef_position = self.draw_staff_clef(screen, staff)
-        #print(f"clef position: {clef_position}")
         key_signature_position = Position(clef_position.x + 20, clef_position.y)
         last_offset_x = self.draw_key_signature(staff, screen, key_signature_position)
-        self.draw_time_signature(screen, staff.time_signature, Position(last_offset_x + 30, staff.top_position.y))
+        self.draw_time_signature(screen, staff.time_signature, Position(last_offset_x + 30, staff.top_position.y))               
+        self.render_staff_all_collaterals(screen, staff)
 
     """
         Draws any items in ApplicationState that collide with the line
     """
-    def draw_line_collaterals(self, screen, line):
+    def draw_staff_item_collaterals(self, screen, staff_item, nearest_staff=None):
         if self.state.current_mouse_over_position is None:
-            return 
+            return
         
-        if line.contains_position(self.state.current_mouse_over_position):
-            self.render_mouse_tracker(screen, self.state.current_mouse_over_position)
+        if staff_item.contains_position(self.state.current_mouse_over_position):
+            self.render_mouse_tracker(screen, self.state.current_mouse_over_position, staff_item.key_id)
+            mouse_position = Position(self.state.current_mouse_over_position.x, self.state.current_mouse_over_position.y)
+            
+
+            if staff_item.is_virtual and nearest_staff is not None:
+                moving_factor = 0
+                # check if position is top or bottom of staff
+                if mouse_position.is_above_position(nearest_staff.top_position):
+                    start_position = mouse_position
+                    end_position = nearest_staff.top_position
+                    moving_factor = 1
+                elif mouse_position.is_below_position(nearest_staff.bottom_position):
+                    start_position = mouse_position
+                    end_position = nearest_staff.bottom_position
+                    moving_factor = -1
+
+                if isinstance(staff_item, Line):
+                    self.draw_virtual_lines(screen, moving_factor, start_position, nearest_staff, include_colliding_line=True)
+                elif isinstance(staff_item, Interval):
+                    self.draw_virtual_lines(screen, moving_factor, start_position, nearest_staff)
+
             self.state.previous_mouse_over_position = self.state.current_mouse_over_position
             self.state.current_mouse_over_position = None
+            return self.state.previous_mouse_over_position
+        
+    """
+        Draws all virtual lines from position on top or bottom of staff all the way to it.
+        moving_factor: direction in which we draw virtual lines. moving down (1) or up (-1), 
+        mouse_position: last recorded position of the mouse (in state), 
+        nearest_staff: closest staff to the mouse_position, 
+        include_colliding_line: tells if we draw the line on mouse_position (True for lines and False for intervals)
+    """
+    def draw_virtual_lines(self, screen, moving_factor, mouse_position, nearest_staff, include_colliding_line = False):
+        for line in nearest_staff.virtual_lines:
+            print(line.start_position)
+            # if mouse position is on top of staff
+            if ((moving_factor == 1 and line.is_above_position(nearest_staff.top_position) 
+                and line.is_below_position(mouse_position))  
+                or (include_colliding_line and line.contains_position(mouse_position))):
+                self.draw_virtual_line(screen, mouse_position, color=(255,0,0))
+            # if the mouse_position is below the staff
+            elif ((moving_factor == -1 and line.is_below_position(nearest_staff.bottom_position)
+                   and line.is_above_position(mouse_position)) 
+                   or (include_colliding_line and line.contains_position(mouse_position))):
+                self.draw_virtual_line(screen, mouse_position, color=(0,0,255))           
 
-    def render_mouse_tracker(self, screen, position):
-        pygame.draw.circle(screen, self.Grey, position.get_tuple(), 5)
+    def render_mouse_tracker(self, screen, position, key_id):
+        self.draw_note(screen, self.default_note_duration, key_id, 40, 30, position)
+
 
     def draw_staff_boundaries(self, staff, screen):
         #print(f"{staff.position_rect}")
         self.draw_line_from_point(staff.position_rect.top_left, staff.position_rect.bottom_left, screen, thickness=2)
         self.draw_line_from_point(staff.position_rect.top_right, staff.position_rect.bottom_right, screen, thickness=2)
-    
-    def draw_line(self, line, screen, color=(0, 0, 0), thickness=1):
-        self.draw_line_from_point(line.start_position, line.end_position, screen, color, thickness)       
 
-    def draw_line_from_point(self, start_point, end_point, screen, color=(0, 0, 0), thickness=1):
-        pygame.draw.line(screen, color, (start_point.x, start_point.y),
-                         (end_point.x, end_point.y), thickness)
-        
-    def draw_virtual_line(self, screen, line, position, color=(0, 0, 0), thickness=1, specified_line_width=40):
-        half_line_width = (line.end_position.x - line.start_position.x) // 2
-        start_x = line.start_position.x + (half_line_width - (specified_line_width // 2))
+    """
+        Draws a virtual line at the top or bottom of the staff
+        line: the line matching/holding our point/position
+        position: the center of our virtual line (mouse position) 
+    """ 
+    def draw_virtual_line(self, screen, position, color=(0, 0, 0), thickness=1, specified_line_width=30):       
+        start_x = position.x - (specified_line_width // 2)
         end_x = start_x + specified_line_width
         pygame.draw.line(screen, color, (start_x, position.y),
-                         (end_x,  position.y), thickness)
-
-    """ 
-        Draws text on screen. position: Position object
-    """
-    def draw_text(self, screen, text, position, font_size, container_width=100, font_color=(0, 0, 0), text_alignment="LEFT"):
-        font = pygame.font.SysFont(None, font_size)  # None = default font, 48 = font size
-        text_renderer = font.render(text, True, font_color)
-        if text_alignment == "RIGHT":
-            text_rect = text_renderer.get_rect()
-            text_rect.topright = (position.x, position.y) # 20 px for padding
-            screen.blit(text_renderer, text_rect)
-        elif text_alignment == "CENTER": # position here is the will be x: staff_top_left and y where you want title
-            text_block_x = (container_width // 2) - (text_renderer.get_width() // 2)
-            screen.blit(text_renderer, (position.x + text_block_x, position.y))
-            #print((position.x + text_block_x, position.y))
-        else:
-            screen.blit(text_renderer, (position.x, position.y))  # White color text
+                         (end_x,  position.y), thickness)    
+        
+    #def draw_virtual_lines(self, nearest_staff, position):     
+       
   
-
     """
         Draws the clef on the staff
     """
@@ -169,7 +170,6 @@ class StaffRenderer:
         screen.blit(time_numerator, numerator_rect)
         screen.blit(time_denominator, denominator_rect)
         return numerator_rect.center, denominator_rect.center
-
     
     """
         Draws the key signature of the staff

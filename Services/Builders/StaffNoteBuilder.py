@@ -22,6 +22,7 @@ class StaffNoteBuilder:
         notes_per_interval = self.modulate_staff_notes(clef_settings["notes_per_interval"], clef, key_signature, modulation_type)
         interval_notes_top, line_notes_top = self.modulate_virtual_notes(clef, notes_per_line[-1], amplitude_for_lines_and_intervals,  key_signature,  VERTICAL_POSITION_TOP, modulation_type)
         interval_notes_bottom, line_notes_bottom = self.modulate_virtual_notes(clef, notes_per_line[0], amplitude_for_lines_and_intervals, key_signature, VERTICAL_POSITION_BOTTOM, modulation_type)
+       
         return (notes_per_interval, notes_per_line), (interval_notes_top, line_notes_top), (interval_notes_bottom, line_notes_bottom)
 
     def modulate_staff_notes(self, notes, clef, key_signature, modulation_type):

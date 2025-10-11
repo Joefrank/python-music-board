@@ -39,6 +39,12 @@ class Staff:
         self.notes_top_offset = top
         self.notes_bottom_offset = bottom
 
+    def get_width(self):
+        return self.top_line.end_position.x - self.top_line.start_position.x
+    
+    def get_height(self):
+        return self.bottom_position.y - self.top_position.y 
+
     def __str__(self):
         lines_str = "-> ".join(str(line) for line in self.lines)
         intervals_str = "-> ".join(str(interval) for interval in self.intervals)
