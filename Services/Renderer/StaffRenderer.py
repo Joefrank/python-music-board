@@ -69,8 +69,7 @@ class StaffRenderer(BaseRenderer):
         
         if staff_item.contains_position(self.state.current_mouse_over_position):
             self.render_mouse_tracker(screen, self.state.current_mouse_over_position, staff_item.key_id)
-            mouse_position = Position(self.state.current_mouse_over_position.x, self.state.current_mouse_over_position.y)
-            
+            mouse_position = Position(self.state.current_mouse_over_position.x, self.state.current_mouse_over_position.y)           
 
             if staff_item.is_virtual and nearest_staff is not None:
                 moving_factor = 0
@@ -101,18 +100,18 @@ class StaffRenderer(BaseRenderer):
         include_colliding_line: tells if we draw the line on mouse_position (True for lines and False for intervals)
     """
     def draw_virtual_lines(self, screen, moving_factor, mouse_position, nearest_staff, include_colliding_line = False):
-        for line in nearest_staff.virtual_lines:
-            print(line.start_position)
+        for line in nearest_staff.virtual_lines:# we only draw lines. intervals are visible between lines
+            virtual_line_position = Position(mouse_position.x, line.start_position.y)
             # if mouse position is on top of staff
             if ((moving_factor == 1 and line.is_above_position(nearest_staff.top_position) 
                 and line.is_below_position(mouse_position))  
-                or (include_colliding_line and line.contains_position(mouse_position))):
-                self.draw_virtual_line(screen, mouse_position, color=(255,0,0))
+                or (include_colliding_line and line.contains_position(mouse_position))): 
+                self.draw_virtual_line(screen, virtual_line_position, color=(255,0,0))
             # if the mouse_position is below the staff
             elif ((moving_factor == -1 and line.is_below_position(nearest_staff.bottom_position)
                    and line.is_above_position(mouse_position)) 
                    or (include_colliding_line and line.contains_position(mouse_position))):
-                self.draw_virtual_line(screen, mouse_position, color=(0,0,255))           
+                self.draw_virtual_line(screen, virtual_line_position, color=(0,0,255))           
 
     def render_mouse_tracker(self, screen, position, key_id):
         self.draw_note(screen, self.default_note_duration, key_id, 40, 30, position)
@@ -128,14 +127,12 @@ class StaffRenderer(BaseRenderer):
         line: the line matching/holding our point/position
         position: the center of our virtual line (mouse position) 
     """ 
-    def draw_virtual_line(self, screen, position, color=(0, 0, 0), thickness=1, specified_line_width=30):       
-        start_x = position.x - (specified_line_width // 2)
+    def draw_virtual_line(self, screen, position, color=(0, 0, 0), thickness=1, specified_line_width=20):            
+        start_x = position.x - specified_line_width #- (specified_line_width // 2)
         end_x = start_x + specified_line_width
+        #print(f"line start: {start_x,position.y} - End: {end_x,  position.y} - mouse position:{position}") 
         pygame.draw.line(screen, color, (start_x, position.y),
-                         (end_x,  position.y), thickness)    
-        
-    #def draw_virtual_lines(self, nearest_staff, position):     
-       
+                         (end_x,  position.y), thickness) 
   
     """
         Draws the clef on the staff

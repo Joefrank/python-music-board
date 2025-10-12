@@ -33,4 +33,4 @@ class Line:
         return self.start_position.y > position.y and self.end_position.y > position.y
 
     def __str__(self):
-        return f"\n{"Virtual " if self.is_virtual else ""}Line #{self.staff_index} - Thickness: {self.thickness} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Start: {self.start_position.x, self.start_position.y} - End: {self.end_position.x, self.end_position.y}"
+        return f"\n{"Virtual " if self.is_virtual else ""}Line #{self.staff_index} - Thickness: {self.thickness} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Start: {self.start_position} - End: {self.end_position}"

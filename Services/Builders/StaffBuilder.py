@@ -47,14 +47,15 @@ class StaffBuilder:
     """
     def build_lines(self, no_of_lines, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, vertical_positioning):
         #because we are starting to build lines from top to bottom and our key details are
-        # from bottom to top, we need to reverse the array.
+        # from bottom to top, we need to reverse the array.  
         piano_key_details.reverse()  
 
-        for i in range(no_of_lines):
+        for i in range(no_of_lines):                 
             line_y = (i * (interval_thickness + line_thickness))
             start_position = Position(original_position.x, original_position.y + line_y)
             end_position = Position(original_position.x + self.staff_width, original_position.y + line_y)
             line = Line(start_position, end_position, line_thickness, is_virtual, piano_key_details[i][0], piano_key_details[i], vertical_positioning, (i+1))
+            #print(f"{line}")
             self.lines.append(line)
         
         return self
@@ -85,7 +86,7 @@ class StaffBuilder:
     """
     def build_intervals(self, no_of_intervals, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, vertical_positioning):
         # because we are starting to build lines from top to bottom and our key details are
-        # from bottom to top, we need to reverse the array.
+        # from bottom to top, we need to reverse the array.       
         piano_key_details.reverse()  
 
         for i in range(no_of_intervals):
@@ -98,6 +99,7 @@ class StaffBuilder:
                              Position(original_position.x, interval_y_bottom))
 
             interval = Interval(position_rect, piano_key_details[i][0], piano_key_details[i], is_virtual, vertical_positioning, (i+1))
+            #print(f"{interval}")
             self.intervals.append(interval)
         
         return self

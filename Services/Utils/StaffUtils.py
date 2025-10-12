@@ -1,3 +1,4 @@
+from Configs.music_config import MODULATION_FLAT, MODULATION_SHARP, piano_notes_sharps, piano_notes_flats
 from Models import GrandStaff
 from Models.Position import Position
 from Models.Staff import Staff
@@ -79,3 +80,12 @@ class StaffUtils:
                 width = staff.bottom_right_position.x - staff.top_left_position.x
 
         return width, height
+    
+    @staticmethod
+    def get_all_notes_by_modulation(modulation_type):
+        if modulation_type == MODULATION_SHARP:  # modulate note
+            return piano_notes_sharps
+        elif modulation_type == MODULATION_FLAT:
+            return piano_notes_flats
+        else:
+            return None

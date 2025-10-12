@@ -39,35 +39,39 @@ class StaffBuilderDirector:
         # Initialize the staff
         self.staff_builder.init_staff(clef, time_signature, key_signature, staff_vertical_padding, staff_original_position, staff_width)
         # Build music notes for staff and padding areas
-        staff_note_items, staff_note_top_items, staff_note_bottom_item = self.staff_note_builder.build_staff_notes(clef, key_signature, possible_no_oftop_lines_and_intervals)
+        staff_note_items = self.staff_note_builder.build_staff_notes(clef, key_signature, possible_no_oftop_lines_and_intervals)
 
         # this gives the total number of lines and intervals we can fit in the staff_offset_margins_y
         # Build all lines and intervals above the staff        
         original_position = Position(staff_original_position.x, staff_original_position.y - possible_staff_padding)        
-        #print(f"original_position VL-top: {original_position.x, original_position.y}")
-        self.staff_builder.build_virtual_lines(self.interval_thickness, self.line_thickness, staff_note_top_items[1], original_position,
-                                               VERTICAL_POSITION_TOP, possible_staff_padding, possible_no_oftop_lines_and_intervals)
+        top_notes = staff_note_items.top_of_staff_notes
+        staff_notes = staff_note_items.staff_notes
+        bottom_notes = staff_note_items.bottom_of_staff_notes
+
+        self.staff_builder.build_virtual_lines(self.interval_thickness, self.line_thickness, top_notes.line_notes,
+                                                original_position, VERTICAL_POSITION_TOP, possible_staff_padding, 
+                                                possible_no_oftop_lines_and_intervals)
         original_position = Position(original_position.x, original_position.y + self.line_thickness)
-        #print(f"original_position VI-top: {original_position.x, original_position.y}")
-        self.staff_builder.build_virtual_intervals(self.interval_thickness, self.line_thickness, staff_note_top_items[0], original_position,
+        
+        self.staff_builder.build_virtual_intervals(self.interval_thickness, self.line_thickness, top_notes.interval_notes, 
+                                                   original_position,
                                                    VERTICAL_POSITION_TOP, possible_no_oftop_lines_and_intervals)
         # Build all lines and intervals on staff
         original_position = staff_original_position
         #print(f"original_position Lines: {original_position.x, original_position.y}")
-        self.staff_builder.build_lines(self.staff_no_lines, self.interval_thickness, self.line_thickness, staff_note_items[1], original_position, False, VERTICAL_POSITION_ON)
+        self.staff_builder.build_lines(self.staff_no_lines, self.interval_thickness, self.line_thickness, staff_notes.line_notes, original_position, False, VERTICAL_POSITION_ON)
         original_position = Position(staff_original_position.x, staff_original_position.y + self.line_thickness)
         # print(f"original_position Intervals: {original_position.x, original_position.y}")
-        self.staff_builder.build_intervals(self.staff_no_intervals, self.interval_thickness, self.line_thickness, staff_note_items[0], original_position, False, VERTICAL_POSITION_ON)
-                
+        self.staff_builder.build_intervals(self.staff_no_intervals, self.interval_thickness, self.line_thickness, staff_notes.interval_notes, original_position, False, VERTICAL_POSITION_ON)
         # Build all lines and intervals below the staff
         staff_bottom_line = self.staff_builder.get_staff_bottom_line()
         #staff_bottom_line = self.staff_builder.staff.bottom_line # we can now use the staff bottom_line
         original_position = Position(staff_bottom_line.start_position.x, staff_bottom_line.start_position.y + 1) # + 1 because we want to start at the next pixel after the bottom line thickness
-        #print(f"original_position VI-bottom: {original_position.x, original_position.y}")
-        self.staff_builder.build_virtual_intervals(self.interval_thickness, self.line_thickness, staff_note_bottom_item[0], original_position, VERTICAL_POSITION_BOTTOM, possible_no_oftop_lines_and_intervals)
+        
+        self.staff_builder.build_virtual_intervals(self.interval_thickness, self.line_thickness, bottom_notes.interval_notes, original_position, VERTICAL_POSITION_BOTTOM, possible_no_oftop_lines_and_intervals)
         original_position = Position(staff_bottom_line.start_position.x, staff_bottom_line.start_position.y + self.interval_thickness + 1)
        # print(f"original_position VL-bottom: {original_position.x, original_position.y}")
-        self.staff_builder.build_virtual_lines(self.interval_thickness, self.line_thickness, staff_note_bottom_item[1], original_position, VERTICAL_POSITION_BOTTOM, possible_staff_padding, possible_no_oftop_lines_and_intervals)
+        self.staff_builder.build_virtual_lines(self.interval_thickness, self.line_thickness, bottom_notes.line_notes, original_position, VERTICAL_POSITION_BOTTOM, possible_staff_padding, possible_no_oftop_lines_and_intervals)
         current_staff = self.staff_builder.build_staff()
         self.staff_builder.set_position() 
         return current_staff
