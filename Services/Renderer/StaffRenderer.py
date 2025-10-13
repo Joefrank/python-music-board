@@ -37,19 +37,19 @@ class StaffRenderer(BaseRenderer):
     """
         Renders all items like notes on lines and intervals
     """
-    def render_staff_all_collaterals(self, screen, staff):
+    def render_staff_all_collaterals(self, screen, staff, last_x_offset):
         for line in staff.lines:
             self.draw_line(line, screen)            
-            self.draw_staff_item_collaterals(screen, line)
+            self.draw_staff_item_collaterals(screen, line, last_x_offset)
 
         for interval in staff.intervals:
-            self.draw_staff_item_collaterals(screen, interval)
+            self.draw_staff_item_collaterals(screen, interval, last_x_offset)
 
         for line in staff.virtual_lines:
-            self.draw_staff_item_collaterals(screen, line, nearest_staff=staff)            
+            self.draw_staff_item_collaterals(screen, line, last_x_offset, nearest_staff=staff)            
 
         for interval in staff.virtual_intervals:
-            self.draw_staff_item_collaterals(screen, interval, nearest_staff=staff)
+            self.draw_staff_item_collaterals(screen, interval, last_x_offset, nearest_staff=staff)
 
 
     def render_staff(self, staff, screen): 
@@ -57,17 +57,20 @@ class StaffRenderer(BaseRenderer):
         clef_position = self.draw_staff_clef(screen, staff)
         key_signature_position = Position(clef_position.x + 20, clef_position.y)
         last_offset_x = self.draw_key_signature(staff, screen, key_signature_position)
-        self.draw_time_signature(screen, staff.time_signature, Position(last_offset_x + 30, staff.top_position.y))               
-        self.render_staff_all_collaterals(screen, staff)
+        last_offset_x += 30
+        _, _, end_offset = self.draw_time_signature(screen, staff.time_signature, Position(last_offset_x, staff.top_position.y))  
+        # Collaterals are every music symbols to be drawn on or around the staff. 
+        end_offset += 30            
+        self.render_staff_all_collaterals(screen, staff, end_offset)
 
     """
         Draws any items in ApplicationState that collide with the line
     """
-    def draw_staff_item_collaterals(self, screen, staff_item, nearest_staff=None):
+    def draw_staff_item_collaterals(self, screen, staff_item, last_item_x_offset, nearest_staff=None):
         if self.state.current_mouse_over_position is None:
             return
         
-        if staff_item.contains_position(self.state.current_mouse_over_position):
+        if staff_item.mouse_hovering_around(self.state.current_mouse_over_position, StaffConfig.STAFF_ITEM_THRESHOLD):
             self.render_mouse_tracker(screen, self.state.current_mouse_over_position, staff_item.key_id)
             mouse_position = Position(self.state.current_mouse_over_position.x, self.state.current_mouse_over_position.y)           
 
@@ -166,7 +169,8 @@ class StaffRenderer(BaseRenderer):
         denominator_rect.center = (position.x + item_margins[2], position.y + item_margins[3]  + (item_size // 2))
         screen.blit(time_numerator, numerator_rect)
         screen.blit(time_denominator, denominator_rect)
-        return numerator_rect.center, denominator_rect.center
+        next_x_offset = position.x + item_size
+        return numerator_rect.center, denominator_rect.center, next_x_offset
     
     """
         Draws the key signature of the staff

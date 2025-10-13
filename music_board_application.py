@@ -29,7 +29,7 @@ class MusicBoardApplication:
     def initialize(self) -> None:
         """ Initializes everything to do with music-board application """
        #try:
-        default_time_signature, default_key_signature, score_title = "3x4", "Ab", "We Gather Together"
+        default_time_signature, default_key_signature, score_title = "3x4", "Gb", "We Gather Together"
         score_credits = [
             ["Anonymous, 1625", "Tr. by Theodore Baker, 1917 (1851-1934)"],
             ["KREMSER Irregular", "Netherland Folk Song, 1625","Arr. by Edward Kremser (1838-1914)"]

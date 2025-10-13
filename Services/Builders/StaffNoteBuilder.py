@@ -35,7 +35,7 @@ class StaffNoteBuilder:
         resulting_notes = []
         unsharpenabled_notes = ['E','B']
         unflattenable_notes = ['C','F']
-
+        
         for note in notes:
             note_char1 = note[0]
             if note_char1 in modulated_notes:                
@@ -43,13 +43,24 @@ class StaffNoteBuilder:
                 if modulation_type == MODULATION_SHARP: # modulate note
                     if note_char1 in unsharpenabled_notes: #we don't sharpen these types, just jump to next note.
                         new_char1 = modulation_details[note_char1][2]
-                        new_note = new_char1 + note[1:]
+                        if note[0] == 'B':
+                            note_index = int(note[1]) + 1
+                            new_note = f"{new_char1}{note_index}" 
+                        else: 
+                            new_note = new_char1 + note[1] 
+                        print(f"Unsharpened note:{note} - new_char1: {new_char1} - new_note: {new_note}")
                     else:
                         new_note = f"{note}#"
                 elif modulation_type == MODULATION_FLAT:
                     if note_char1 in unflattenable_notes: #we don't flatten these types, just jump to previous note.
                         new_char1 = modulation_details[note_char1][2]
-                        new_note = new_char1 + note[1:]
+                        if note[0] == 'C':
+                            note_index = int(note[1]) - 1
+                            new_note = f"{new_char1}{note_index}"
+                        else: 
+                            new_note = new_char1 + note[1] 
+                        print(f"Unflattened note:{note} - new_char1: {new_char1} - new_note: {new_note}")
+                        #new_note = new_char1 + note[1:] 
                     else:
                         new_note = f"{note}b"
                 else:
@@ -57,6 +68,7 @@ class StaffNoteBuilder:
                 resulting_notes.append(new_note)
             else:
                 resulting_notes.append(note)
+       
         return resulting_notes
 
     """

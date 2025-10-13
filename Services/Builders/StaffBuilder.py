@@ -1,7 +1,9 @@
 
 
 from Configs.screen_config import VERTICAL_POSITION_BOTTOM, VERTICAL_POSITION_TOP
+from Configs.music_config import supported_clef_settings
 from Models import Interval, Rect
+from Models.CollateralBoundary import CollateralBoundary
 from Models.Line import Line
 from Models.Position import Position
 from Models.Staff import Staff
@@ -45,7 +47,8 @@ class StaffBuilder:
         is_virtual: tells if interval is virtual or not
         vertical_positioning: tells if line is above, below (virtual) or on the staff
     """
-    def build_lines(self, no_of_lines, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, vertical_positioning):
+    def build_lines(self, no_of_lines, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, 
+                    vertical_positioning, left_collateral_offset, right_collateral_offset):
         #because we are starting to build lines from top to bottom and our key details are
         # from bottom to top, we need to reverse the array.  
         piano_key_details.reverse()  
@@ -53,9 +56,10 @@ class StaffBuilder:
         for i in range(no_of_lines):                 
             line_y = (i * (interval_thickness + line_thickness))
             start_position = Position(original_position.x, original_position.y + line_y)
-            end_position = Position(original_position.x + self.staff_width, original_position.y + line_y)
-            line = Line(start_position, end_position, line_thickness, is_virtual, piano_key_details[i][0], piano_key_details[i], vertical_positioning, (i+1))
-            #print(f"{line}")
+            end_position = Position(original_position.x + self.staff_width, original_position.y + line_y)            
+            line_collateral_boundaries = CollateralBoundary(start_position.x + left_collateral_offset,end_position.x - right_collateral_offset)
+            line = Line(start_position, end_position, line_thickness, is_virtual, piano_key_details[i][0], piano_key_details[i],
+                         vertical_positioning, (i+1), line_collateral_boundaries)
             self.lines.append(line)
         
         return self
@@ -84,7 +88,8 @@ class StaffBuilder:
         is_virtual: tells if interval is virtual or not
         vertical_positioning: tells if interval is above, below (virtual) or on the staff
     """
-    def build_intervals(self, no_of_intervals, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, vertical_positioning):
+    def build_intervals(self, no_of_intervals, interval_thickness, line_thickness, piano_key_details, original_position, is_virtual, vertical_positioning,
+                        left_collateral_offset, right_collateral_offset):
         # because we are starting to build lines from top to bottom and our key details are
         # from bottom to top, we need to reverse the array.       
         piano_key_details.reverse()  
@@ -97,9 +102,10 @@ class StaffBuilder:
                                  Position(original_position.x + self.staff_width, interval_top_y),
                              Position(original_position.x + self.staff_width, interval_y_bottom),
                              Position(original_position.x, interval_y_bottom))
-
-            interval = Interval(position_rect, piano_key_details[i][0], piano_key_details[i], is_virtual, vertical_positioning, (i+1))
-            #print(f"{interval}")
+            line_collateral_boundaries = CollateralBoundary(original_position.x + left_collateral_offset, original_position.x + 
+                                                            self.staff_width - right_collateral_offset)
+            interval = Interval(position_rect, piano_key_details[i][0], piano_key_details[i], is_virtual, vertical_positioning, (i+1),
+                                line_collateral_boundaries)            
             self.intervals.append(interval)
         
         return self
@@ -116,9 +122,10 @@ class StaffBuilder:
         vertical_positioning: tells if interval is above, below (virtual) or on the staff
         staff_offset_margins_y: specifies how many pixes we can place virtual lines and intervals above/below staff. for 5 intervals, pass 5 * interval_tickness
     """
-    def build_virtual_intervals(self, interval_thickness, line_thickness, piano_key_details, original_position, vertical_positioning, no_of_intervals):
+    def build_virtual_intervals(self, interval_thickness, line_thickness, piano_key_details, original_position, vertical_positioning, no_of_intervals,
+                                 left_collateral_offset, right_collateral_offset):
         self.build_intervals(no_of_intervals, interval_thickness, line_thickness, piano_key_details, original_position,
-                             True, vertical_positioning)
+                             True, vertical_positioning, left_collateral_offset, right_collateral_offset)
         
         return self
 
@@ -131,10 +138,11 @@ class StaffBuilder:
        vertical_positioning: tells if line is above, below (virtual) or on the staff
        staff_offset_margins_y: specifies how many pixes we can place virtual lines and intervals above/below staff. for 5 lines, pass 5 * interval_thickness
     """
-    def build_virtual_lines(self, interval_thickness, line_thickness, piano_key_details, original_position, vertical_positioning, staff_offset_margins_y, no_of_lines):
+    def build_virtual_lines(self, interval_thickness, line_thickness, piano_key_details, original_position, vertical_positioning,
+                             staff_offset_margins_y, no_of_lines, left_collateral_offset, right_collateral_offset):
        
         self.build_lines(no_of_lines, interval_thickness, line_thickness, piano_key_details, original_position,
-                         True, vertical_positioning)
+                         True, vertical_positioning, left_collateral_offset, right_collateral_offset)
 
         return self
 
@@ -178,6 +186,17 @@ class StaffBuilder:
                                         self.staff.bottom_line.end_position, self.staff.bottom_line.start_position)
         self.staff.top_position = self.staff.top_line.start_position
         self.staff.bottom_position = self.staff.bottom_line.start_position
+
+    """
+        Works out left offset on staff/lines where we can start displaying notes and other musical signs.
+        Ideally we leave 40 px for the clef and 20 px for each signature item.
+    """
+    def calculate_left_collateral_offset(self, clef, key_signature):
+        signature_len = len(supported_clef_settings[clef]["signature_position_pattern"][key_signature])
+        print(f"signature_len: {signature_len}")
+        clef_width = 40
+        return clef_width + (signature_len * 20)
+
         
 
 

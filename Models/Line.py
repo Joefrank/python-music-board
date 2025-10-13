@@ -8,8 +8,10 @@ class Line:
     key_id = None
     notes = []
     thickness = None
+    
 
-    def __init__(self, start_position, end_position, thickness, is_virtual, key, key_id, vertical_positioning, staff_index):
+    def __init__(self, start_position, end_position, thickness, is_virtual, key, key_id, vertical_positioning,
+                  staff_index, line_collateral_boundaries):
         self.staff_index = staff_index
         self.start_position = start_position
         self.end_position = end_position
@@ -18,13 +20,29 @@ class Line:
         self.key_id = key_id
         self.is_virtual = is_virtual
         self.vertical_positioning = vertical_positioning
+        self.line_collateral_boundaries = line_collateral_boundaries
+
 
     def add_note(self, note):
         self.notes.append(note)
 
+    def is_in_vertical_proximity_of_position(self, position, vertical_threshold=0):
+        return (self.start_position.y - vertical_threshold) <= position.y <= (self.start_position.y + vertical_threshold)
+
     def contains_position(self, position):
         return ((self.start_position.x <= position.x <= self.end_position.x and position.y == self.start_position.y)
         or (self.start_position.y <= position.y <= self.end_position.y and position.x == self.start_position.x))
+
+    def is_within_collateral_boundaries(self, position):
+        return self.line_collateral_boundaries.left_boundary <= position.x <= self.line_collateral_boundaries.right_boundary
+    
+    """
+        We use this to track mouse 2 pixels around a line.
+    """
+    def mouse_hovering_around(self, mouse_position, vertical_threshold=0):
+        return (self.is_within_collateral_boundaries(mouse_position) and 
+                (self.is_in_vertical_proximity_of_position(mouse_position, vertical_threshold) or
+                self.contains_position(mouse_position)))
 
     def is_above_position(self, position):
         return self.start_position.y < position.y and self.end_position.y < position.y

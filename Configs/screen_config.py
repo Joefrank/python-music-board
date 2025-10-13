@@ -26,7 +26,8 @@ class StaffConfig:
     STAFF_NOTE_STEM_SIZE: int =  30
     STAFF_ORIGINAL_Y_OFFSET: int = 200 # this is where the first staff will be placed. all subsequent will be calculated from this
     VIRTUAL_LINE_WIDTH:  int = 20
-
+    STAFF_ITEM_THRESHOLD: int = 2
+    
 @dataclass
 class GenericConfig:
     BRAVURA_FONT_PATH = "fonts/Bravura.otf"
