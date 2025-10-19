@@ -1,13 +1,14 @@
 import pygame
 import math
 from datetime import datetime
-from Models import GrandStaff, Interval, MusicScore
+from Models import GrandStaff, Interval, MusicScore, Note
 from Models.Line import Line
 from Models.Position import Position
-from Configs.music_config import supported_clef_settings, supported_time_signatures, supported_modulations
+from Configs.music_config import supported_clef_settings, supported_time_signatures, supported_modulations, lowest_note_code
 from Configs.screen_config import GenericConfig, StaffConfig, staff_generic_settings
 from Models.Staff import Staff
 from Services.Renderer.BaseRenderer import BaseRenderer
+from Services.Sound.PianoSoundPlayer import SoundPlayer
 from Services.Utils import StaffUtils
 
 
@@ -20,8 +21,9 @@ class StaffRenderer(BaseRenderer):
         self.STAFF_ITEM_LINE = 0
         self.STAFF_ITEM_INTERVAL = 1
         self.music_score = None
-        #self.state = state
+        self.piano_notes = None       
         self.Grey = (100, 100, 100)
+        self.sound_player = state.sound_player
       
     def render_grand_staff(self, grand_staff, screen):
         previous_staff = None
@@ -73,6 +75,17 @@ class StaffRenderer(BaseRenderer):
         if staff_item.mouse_hovering_around(self.state.current_mouse_over_position, StaffConfig.STAFF_ITEM_THRESHOLD):
             self.render_mouse_tracker(screen, self.state.current_mouse_over_position, staff_item.key_id)
             mouse_position = Position(self.state.current_mouse_over_position.x, self.state.current_mouse_over_position.y)           
+            
+            # now check if we have click event and display note.
+            if self.state.current_mouse_click_position is not None:
+                self.render_note_at_position(mouse_position, screen, staff_item)
+                if len(staff_item.key_id) == 3:
+                    modulation_key = staff_item.key_id[2]
+                else:
+                    modulation_key = None
+                piano_notes = StaffUtils.get_all_notes_by_modulation_key(modulation_key)
+                key_index = piano_notes.index(staff_item.key_id)                
+                self.sound_player.play_key(lowest_note_code + key_index)
 
             if staff_item.is_virtual and nearest_staff is not None:
                 moving_factor = 0
@@ -80,11 +93,11 @@ class StaffRenderer(BaseRenderer):
                 if mouse_position.is_above_position(nearest_staff.top_position):
                     start_position = mouse_position
                     end_position = nearest_staff.top_position
-                    moving_factor = 1
+                    moving_factor = 1 # top to bottom direction
                 elif mouse_position.is_below_position(nearest_staff.bottom_position):
                     start_position = mouse_position
                     end_position = nearest_staff.bottom_position
-                    moving_factor = -1
+                    moving_factor = -1 # bottom to top direction
 
                 if isinstance(staff_item, Line):
                     self.draw_virtual_lines(screen, moving_factor, start_position, nearest_staff, include_colliding_line=True)
@@ -95,6 +108,25 @@ class StaffRenderer(BaseRenderer):
             self.state.current_mouse_over_position = None
             return self.state.previous_mouse_over_position
         
+    def render_note_at_position(self, mouse_position, screen, staff_item):
+        # Adjust position to be position of staff_item (line/interval)
+        if isinstance(staff_item, Line):
+            note_position = Position(mouse_position.x, staff_item.start_position.y)
+        elif isinstance(staff_item, Interval):
+            rect = staff_item.position_rect
+            y_offset = rect.bottom_left.y - rect.top_left.y // 2
+            note_position = Position(mouse_position.x, y_offset)
+        # change note duration to key pressed
+        note_duration = self.default_note_duration 
+        note_order = staff_item.get_next_note_index()  
+        note_extended = False     
+        new_note = Note(self, staff_item, note_duration, note_position, note_order, note_extended, 
+                        staff_item.key,staff_item.key_id)
+        staff_item.add_note(new_note)        
+        self.draw_note(screen, note_duration, staff_item.key_id, 40, 30, note_position)
+        self.state.previous_mouse_click_position = note_position
+        self.state.current_mouse_click_position = None
+
     """
         Draws all virtual lines from position on top or bottom of staff all the way to it.
         moving_factor: direction in which we draw virtual lines. moving down (1) or up (-1), 
@@ -109,12 +141,14 @@ class StaffRenderer(BaseRenderer):
             if ((moving_factor == 1 and line.is_above_position(nearest_staff.top_position) 
                 and line.is_below_position(mouse_position))  
                 or (include_colliding_line and line.contains_position(mouse_position))): 
-                self.draw_virtual_line(screen, virtual_line_position, color=(255,0,0))
+                self.draw_virtual_line(screen, virtual_line_position, color=(255,0,0), 
+                                       specified_line_width=StaffConfig.VIRTUAL_LINE_WIDTH)
             # if the mouse_position is below the staff
             elif ((moving_factor == -1 and line.is_below_position(nearest_staff.bottom_position)
                    and line.is_above_position(mouse_position)) 
                    or (include_colliding_line and line.contains_position(mouse_position))):
-                self.draw_virtual_line(screen, virtual_line_position, color=(0,0,255))           
+                self.draw_virtual_line(screen, virtual_line_position, color=(0,0,255), 
+                                       specified_line_width=StaffConfig.VIRTUAL_LINE_WIDTH)           
 
     def render_mouse_tracker(self, screen, position, key_id):
         self.draw_note(screen, self.default_note_duration, key_id, 40, 30, position)

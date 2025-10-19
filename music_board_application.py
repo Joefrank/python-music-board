@@ -11,18 +11,19 @@ from Services.Builders import MusicScoreBuilderDirector, StaffBuilderDirector
 from Services.Renderer.StaffRenderer import StaffRenderer
 from Services.Renderer.ScreenRenderer import ScreenRenderer
 from Configs.screen_config import StaffConfig
+from Services.Sound.PianoSoundPlayer import SoundPlayer
 
 class MusicBoardApplication:
 
     def __init__(self):
         self.action_mode = None # Edit or Play(existing item)
-        self.main_canvas = None   
+        self.main_canvas = None
         self.state = ApplicationState()     
         self.staff_renderer = StaffRenderer(self.state)
         self.screen_renderer = ScreenRenderer(self.state)
         self.logger = logging.getLogger(__name__)        
         self.event_handler = EventHandler(self.state)
-        self.staff_builder_director = StaffBuilderDirector()
+        self.staff_builder_director = StaffBuilderDirector()        
         self.score_builder_director = MusicScoreBuilderDirector.MusicScoreBuilderDirector()
         self.music_score = None
 
@@ -53,7 +54,7 @@ class MusicBoardApplication:
 
             while self.state.is_running:
                 # Handle events
-                self.event_handler.handle_events(self.main_canvas)
+                self.event_handler.handle_events()
 
                 # Process music logic
                 #self.controller.process_note_placement()

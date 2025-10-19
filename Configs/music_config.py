@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+
+MODULATION_SHARP_KEY = "#"
+MODULATION_FLAT_KEY = "b"
 MODULATION_SHARP = "MODULATION_SHARP"
 MODULATION_FLAT = "MODULATION_FLAT"
 TREBLE_CLEF = "TREBLE_CLEF"
@@ -11,13 +15,22 @@ musical_rests = [
     {"name": "Sixteenth rest", "no_of_beats": 0.25, "font_code": "\uE4E7"}
 ]
 
+@dataclass
+class NoteDurationInTicks:
+    WHOLE: int = 1920,
+    HALF: int = 960,
+    QUARTER: int = 480,
+    EIGHT: float = 240,
+    SIXTHEENTH: float = 120
+
+
 valid_note_durations = \
-    [ #(duration, note_type font_code, stem-on/off)
-        ("1","Whole", "\uE0A2",False),
-        ("2","Half", "\uE0A2", True),
-        ("4","Quarter","\uE0A4", True),
-        ("8","Eighth","\uE0A4", True),
-        ("0","Sixteenth","\uE0A4", True)
+    [ #(duration, note_type font_code, stem-on/off, Actual duration)
+        ("1","Whole", "\uE0A2",False, NoteDurationInTicks.WHOLE),
+        ("2","Half", "\uE0A2", True, NoteDurationInTicks.HALF),
+        ("4","Quarter","\uE0A4", True, NoteDurationInTicks.QUARTER),
+        ("8","Eighth","\uE0A4", True, NoteDurationInTicks.EIGHT),
+        ("0","Sixteenth","\uE0A4", True, NoteDurationInTicks.SIXTHEENTH)
     ]
 
 default_note_duration = ("4","Quarter","\uE0A4", True)

@@ -50,5 +50,11 @@ class Line:
     def is_below_position(self, position):
         return self.start_position.y > position.y and self.end_position.y > position.y
 
+    def add_note(self, note):
+        self.notes.append(note)
+
+    def get_next_note_index(self):
+        return len(self.notes)
+    
     def __str__(self):
         return f"\n{"Virtual " if self.is_virtual else ""}Line #{self.staff_index} - Thickness: {self.thickness} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Start: {self.start_position} - End: {self.end_position}"

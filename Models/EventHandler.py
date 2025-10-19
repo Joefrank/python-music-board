@@ -14,7 +14,7 @@ class EventHandler:
         self.logger = logging.getLogger(__name__)
         self.screen_renderer = ScreenRenderer(state)
 
-    def handle_events(self, screen) -> None:
+    def handle_events(self) -> None:
         """Process all pygame events."""
         for event in pygame.event.get():
             try:
@@ -22,12 +22,12 @@ class EventHandler:
                     self._handle_quit()
                 elif event.type == pygame.MOUSEMOTION:
                     self._handle_mouse_over(event)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                   self._handle_mouse_click(event)                
                 #elif event.type == pygame.KEYDOWN:
-                   # self._handle_key_down(event)
+                    #self._handle_key_down(event)
                 #elif event.type == pygame.KEYUP:
                   #  self._handle_key_up(event)
-                #elif event.type == pygame.MOUSEBUTTONDOWN:
-                   # self._handle_mouse_click(event)
                 #elif event.type == pygame.VIDEORESIZE:
                    # self._handle_window_resize(event)
             except Exception as e:
@@ -39,10 +39,16 @@ class EventHandler:
         self.logger.info("Application quit requested")
         self.state.is_running = False
 
-    def _handle_mouse_over(self, event):  ## only set this position active if it collides with item on score
+    def _handle_mouse_over(self, event) -> None:  ## only set this position active if it collides with item on score
         if self.state.current_mouse_over_position is None:
             self.state.current_mouse_over_position = Position(event.pos[0], event.pos[1])  
         else:    
             self.state.current_mouse_over_position.from_tuple(event.pos)
         self.state.needs_refresh = True
 
+    def _handle_mouse_click(self, event) -> None:
+        if self.state.current_mouse_click_position is None:
+            self.state.current_mouse_click_position = Position(event.pos[0], event.pos[1])  
+        else:    
+            self.state.current_mouse_click_position.from_tuple(event.pos)
+        self.state.needs_refresh = True

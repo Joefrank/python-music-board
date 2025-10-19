@@ -1,4 +1,4 @@
-from Configs.music_config import MODULATION_FLAT, MODULATION_SHARP, piano_notes_sharps, piano_notes_flats
+from Configs.music_config import MODULATION_FLAT, MODULATION_FLAT_KEY, MODULATION_SHARP, MODULATION_SHARP_KEY, piano_notes_sharps, piano_notes_flats
 from Models import GrandStaff
 from Models.Position import Position
 from Models.Staff import Staff
@@ -89,3 +89,11 @@ class StaffUtils:
             return piano_notes_flats
         else:
             return None
+        
+    @staticmethod
+    def get_all_notes_by_modulation_key(modulation_key):        
+        if modulation_key == MODULATION_SHARP_KEY:  # modulate note
+            return piano_notes_sharps
+        else: 
+            return piano_notes_flats
+        

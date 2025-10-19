@@ -9,8 +9,7 @@ class MusicScoreRenderer(BaseRenderer):
 
     def __init__(self, state):
         super().__init__(state) 
-        self.start_time = datetime.now().time()  
-        #self.state = state
+        self.start_time = datetime.now().time()
         self.staff_renderer = StaffRenderer(state)
 
     def render_score(self, screen, music_score):
