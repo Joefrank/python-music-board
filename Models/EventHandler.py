@@ -54,6 +54,7 @@ class EventHandler:
         self.state.needs_refresh = True
 
     def _handle_mouse_click(self, event) -> None:
+
         if self.state.current_staff_item_hovered is not None:
             mouse_position = Position(event.pos[0], event.pos[1])
             staff_item = self.state.current_staff_item_hovered
@@ -69,8 +70,10 @@ class EventHandler:
 
             #self.staff_renderer.draw_staff_item_notes(self.state.main_canvass, staff_item)
             #self.staff_renderer.render_note_at_position(mouse_position, self.state.main_canvass, staff_item)
+            
             self.state.last_staff_item_hovered = self.state.current_staff_item_hovered
             self.state.current_staff_item_hovered = None
+            
             self.state.needs_refresh = True
 
         # if self.state.current_mouse_click_position is None:

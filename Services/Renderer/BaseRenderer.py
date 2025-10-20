@@ -5,6 +5,10 @@ from Models.Position import Position
 
 class BaseRenderer:
 
+    @property
+    def screen(self):
+        return self.state.main_canvass
+    
     def __init__(self, state):
         self.state = state
         self.screen_init_time = None
@@ -53,12 +57,12 @@ class BaseRenderer:
         note_size: font-size, 
         position: bottom-left position
     """
-    def draw_note(self, screen, note_duration_details, note_name, note_size, stem_height, position):
+    def draw_note(self, note_duration_details, note_name, note_size, stem_height, position):
         note_font_size = pygame.font.Font("fonts/Bravura.otf", note_size)
         note = note_font_size.render(note_duration_details[2], True, (100, 100, 100))
         # Get its rect and move it
         note_rect = note.get_rect(center=position.get_tuple())
-        screen.blit(note, note_rect)
+        self.screen.blit(note, note_rect)
 
         # draw stem only if config says so
         if note_duration_details[3]:
@@ -66,12 +70,17 @@ class BaseRenderer:
             stem_start = (note_rect.right - 2, position.y)  # stem on right
             stem_end = (note_rect.right - 2, position.y - stem_height)
             #print(f"stem_start: {stem_start} - stem_end: {stem_end}")
-            pygame.draw.line(screen, (0, 0, 0), stem_start, stem_end, 2)
+            pygame.draw.line(self.screen, (0, 0, 0), stem_start, stem_end, 2)
             position.translateTo(10, 0)
-            self.draw_text(screen, note_name, position, 30, font_color=(200, 70, 70))
+            self.draw_text(self.screen, note_name, position, 30, font_color=(200, 70, 70))
 
-    def draw_staff_item_note(self, screen, note:Note):
-        self.draw_note(screen, self.default_note_duration, note.key_id, 40, 30, note.position)
+    def draw_staff_item_note(self, note:Note):
+        self.draw_note(self.default_note_duration, note.key_id, 40, 30, note.position)
+
+    """ Draws notes that are on specific staff_item line/interval. """
+    def draw_item_notes(self, staff_item):
+        for note in staff_item.notes:
+            self.draw_staff_item_note(note)
 
     def draw_rect_surface(self, screen, width, height, surface_color, alpha, position):  
         # Create a temporary surface with per-pixel alpha

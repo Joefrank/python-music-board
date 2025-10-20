@@ -21,6 +21,7 @@ class MusicBoardApplication:
         self.state = ApplicationState()     
         self.staff_renderer = StaffRenderer(self.state)
         self.screen_renderer = ScreenRenderer(self.state)
+        self.state.set_renderers(self.staff_renderer,self.screen_renderer)
         self.logger = logging.getLogger(__name__)        
         self.event_handler = EventHandler(self.state, self.staff_renderer)
         self.staff_builder_director = StaffBuilderDirector()        
@@ -39,6 +40,7 @@ class MusicBoardApplication:
         # init the main window
         self.main_canvas = self.screen_renderer.init_screen(window_width, window_height, screen_config.WindowConfig.CAPTION,
                                                     screen_config.WindowConfig.BACKGROUND_COLOR)
+        #self.state.set_main_screen(self.main_canvas)
         self.state.set_main_screen(self.main_canvas)
         
         # init the first staff

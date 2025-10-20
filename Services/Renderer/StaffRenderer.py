@@ -2,6 +2,7 @@ import pygame
 import math
 from datetime import datetime
 from Models import GrandStaff, Interval, MusicScore, Note
+#from Models.DataModels.ApplicationState import ApplicationState
 from Models.Line import Line
 from Models.Position import Position
 from Configs.music_config import NoteDurationInTicks, supported_clef_settings, supported_time_signatures, supported_modulations, lowest_note_code
@@ -14,6 +15,7 @@ from Services.Utils import StaffUtils
 
 class StaffRenderer(BaseRenderer):
 
+   
     def __init__(self, state):
         super().__init__(state) 
         self.start_time = datetime.now().time()        
@@ -24,6 +26,7 @@ class StaffRenderer(BaseRenderer):
         self.piano_notes = None       
         self.Grey = (100, 100, 100)
         self.sound_player = state.sound_player
+        #self.screen = state.main_canvass
       
     def render_grand_staff(self, grand_staff, screen):
         previous_staff = None
@@ -36,28 +39,7 @@ class StaffRenderer(BaseRenderer):
     def bind_staves(self, top_staff, bottom_staff, screen):
         self.draw_line_from_point(top_staff.top_position, bottom_staff.top_position, screen, thickness=2)
 
-    """
-        Renders all items like notes on lines and intervals
-    """
-    def render_staff_all_collaterals(self, screen, staff):
-        for line in staff.lines:
-            self.draw_line(line, screen)            
-            self.draw_staff_item_collaterals(screen, line)
-            if len(line.notes) > 0:
-                self.draw_staff_item_notes(screen, line)
-
-        for interval in staff.intervals:
-            self.draw_staff_item_collaterals(screen, interval)
-            if len(interval.notes) > 0:
-                self.draw_staff_item_notes(screen, interval)
-
-        for line in staff.virtual_lines:
-            self.draw_staff_item_collaterals(screen, line, nearest_staff=staff)            
-
-        for interval in staff.virtual_intervals:
-            self.draw_staff_item_collaterals(screen, interval, nearest_staff=staff)
-
-
+    """ Displays a single staff on our music score."""
     def render_staff(self, staff, screen): 
         self.draw_staff_boundaries(staff, screen)        
         clef_position = self.draw_staff_clef(screen, staff)
@@ -67,17 +49,46 @@ class StaffRenderer(BaseRenderer):
         _, _, end_offset = self.draw_time_signature(screen, staff.time_signature, Position(last_offset_x, staff.top_position.y))  
         # Collaterals are every music symbols to be drawn on or around the staff. 
         end_offset += 30            
-        self.render_staff_all_collaterals(screen, staff)
+        self.render_staff_items(staff)
+
+    """
+        Renders all items: lines, intervals, notes and other musical items. 
+    """
+    def render_staff_items(self, staff):
+        self.render_staff_intervals(staff)
+        self.render_staff_lines(staff)
+
+    """ We don't normally display intervals but lines show gaps which are intervals. 
+        But we do display the contained elements (musical items) on screen."""  
+    def render_staff_intervals(self, staff):
+        for interval in staff.intervals:
+            self.draw_staff_item_collaterals(interval)
+            if len(interval.notes) > 0:
+                self.draw_staff_item_notes(self.screen, interval)                  
+
+        for interval in staff.virtual_intervals:
+            self.draw_staff_item_collaterals(interval, nearest_staff=staff)
+
+    """ Display all staff lines (virtual and non-virtual) and contained elements on screen."""
+    def render_staff_lines(self, staff):
+        for line in staff.lines:
+            self.draw_line(line, self.screen)            
+            self.draw_staff_item_collaterals(line)
+            if len(line.notes) > 0:
+                self.draw_staff_item_notes(self.screen, line)
+
+        for line in staff.virtual_lines:
+            self.draw_staff_item_collaterals(line, nearest_staff=staff) 
 
     """
         Draws any items in ApplicationState that collide with the line
     """
-    def draw_staff_item_collaterals(self, screen, staff_item, nearest_staff=None):
+    def draw_staff_item_collaterals(self, staff_item, nearest_staff=None):
         if self.state.current_mouse_over_position is None:
             return
 
         if staff_item.mouse_hovering_around(self.state.current_mouse_over_position, StaffConfig.STAFF_ITEM_THRESHOLD):            
-            self.render_mouse_tracker(screen, self.state.current_mouse_over_position, staff_item.key_id)
+            self.render_mouse_tracker(self.state.current_mouse_over_position, staff_item.key_id)
             mouse_position = Position(self.state.current_mouse_over_position.x, self.state.current_mouse_over_position.y)           
 
             if staff_item.is_virtual and nearest_staff is not None:
@@ -93,12 +104,12 @@ class StaffRenderer(BaseRenderer):
                     moving_factor = -1 # bottom to top direction
 
                 if isinstance(staff_item, Line):
-                    self.draw_virtual_lines(screen, moving_factor, start_position, nearest_staff, include_colliding_line=True)
+                    self.draw_virtual_lines(self.screen, moving_factor, start_position, nearest_staff, include_colliding_line=True)
                 elif isinstance(staff_item, Interval):
-                    self.draw_virtual_lines(screen, moving_factor, start_position, nearest_staff)
+                    self.draw_virtual_lines(self.screen, moving_factor, start_position, nearest_staff)
 
-            self.state.last_staff_item_hovered = self.state.current_staff_item_hovered
-            self.state.current_staff_item_hovered = staff_item
+            #self.state.last_staff_item_hovered = self.state.current_staff_item_hovered
+            #self.state.current_staff_item_hovered = staff_item
 
             self.state.previous_mouse_over_position = self.state.current_mouse_over_position
             self.state.current_mouse_over_position = None
@@ -119,7 +130,7 @@ class StaffRenderer(BaseRenderer):
         new_note = Note(staff_item, note_duration, note_position, note_order, note_extended, staff_item.key,
                         staff_item.key_id)
         staff_item.add_note(new_note)        
-        self.draw_note(screen, note_duration, staff_item.key_id, 40, 30, note_position)
+        self.draw_note(note_duration, staff_item.key_id, 40, 30, note_position)
         self.state.previous_mouse_click_position = note_position
         self.state.current_mouse_click_position = None
 
@@ -129,7 +140,7 @@ class StaffRenderer(BaseRenderer):
         # if not then let's display all notes
         for note in staff_item.notes:
             print(f"note:{note.position} - len: {len(staff_item.notes)} - note:{note.key_id}")
-            self.draw_staff_item_note(screen, note)
+            self.draw_staff_item_note(note)
 
     """
         Draws all virtual lines from position on top or bottom of staff all the way to it.
@@ -154,8 +165,8 @@ class StaffRenderer(BaseRenderer):
                 self.draw_virtual_line(screen, virtual_line_position, color=(0,0,255), 
                                        specified_line_width=StaffConfig.VIRTUAL_LINE_WIDTH)           
 
-    def render_mouse_tracker(self, screen, position, key_id):
-        self.draw_note(screen, self.default_note_duration, key_id, 40, 30, position)
+    def render_mouse_tracker(self, position, key_id):
+        self.draw_note(self.default_note_duration, key_id, 40, 30, position)
 
 
     def draw_staff_boundaries(self, staff, screen):

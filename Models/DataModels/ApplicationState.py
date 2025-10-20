@@ -4,7 +4,9 @@ from dataclasses import dataclass, field
 from typing import Optional, List, Tuple
 
 from pygame import Surface
-from Models import Position
+from Models.Position import Position
+# from Services.Renderer.ScreenRenderer import ScreenRenderer
+# from Services.Renderer.StaffRenderer import StaffRenderer
 from Services.Sound.PianoSoundPlayer import SoundPlayer
 
 @dataclass
@@ -25,6 +27,12 @@ class ApplicationState:
     def __init__(self):
         self.sound_player = SoundPlayer() 
         self.main_canvass: Surface = None
+        self.staff_renderer = None
+        self.screen_renderer = None
+
+    def set_renderers(self, staff_renderer, screen_renderer):
+        self.staff_renderer = staff_renderer
+        self.screen_renderer = screen_renderer
 
     def set_main_screen(self, screen: Surface):
         self.main_canvass = screen
