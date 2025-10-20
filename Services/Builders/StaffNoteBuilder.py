@@ -48,7 +48,6 @@ class StaffNoteBuilder:
                             new_note = f"{new_char1}{note_index}" 
                         else: 
                             new_note = new_char1 + note[1] 
-                        print(f"Unsharpened note:{note} - new_char1: {new_char1} - new_note: {new_note}")
                     else:
                         new_note = f"{note}#"
                 elif modulation_type == MODULATION_FLAT:
@@ -59,8 +58,6 @@ class StaffNoteBuilder:
                             new_note = f"{new_char1}{note_index}"
                         else: 
                             new_note = new_char1 + note[1] 
-                        print(f"Unflattened note:{note} - new_char1: {new_char1} - new_note: {new_note}")
-                        #new_note = new_char1 + note[1:] 
                     else:
                         new_note = f"{note}b"
                 else:

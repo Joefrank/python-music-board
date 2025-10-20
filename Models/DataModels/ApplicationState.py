@@ -2,27 +2,33 @@
 
 from dataclasses import dataclass, field
 from typing import Optional, List, Tuple
+
+from pygame import Surface
 from Models import Position
 from Services.Sound.PianoSoundPlayer import SoundPlayer
 
 @dataclass
 class ApplicationState:
-    """Manages the current state of the application."""
-   
-    #current_note_duration: Optional[Tuple[str, str, str, bool]] = None
-    #selected_staff = None
-    #last_clicked_position: Optional[Position] = None
+    """Manages the current state of the application."""  
+    
     is_running: bool = True
     needs_refresh: bool = True
     previous_mouse_over_position: Position = None
     current_mouse_over_position: Position = None
     previous_mouse_click_position: Position = None
     current_mouse_click_position: Position = None
+    last_staff_item_hovered = None #line/interval
+    current_staff_item_hovered = None #line/interval
+
     #placed_notes: List = field(default_factory=list)
     #error_messages: List[str] = field(default_factory=list)
     def __init__(self):
         self.sound_player = SoundPlayer() 
+        self.main_canvass: Surface = None
 
+    def set_main_screen(self, screen: Surface):
+        self.main_canvass = screen
+        
     #def set_note_duration(self, duration_details: Tuple[str, str, str, bool]) -> None:
       #  """Set the current note duration."""
         #self.current_note_duration = duration_details

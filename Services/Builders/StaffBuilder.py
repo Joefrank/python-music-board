@@ -192,8 +192,7 @@ class StaffBuilder:
         Ideally we leave 40 px for the clef and 20 px for each signature item.
     """
     def calculate_left_collateral_offset(self, clef, key_signature):
-        signature_len = len(supported_clef_settings[clef]["signature_position_pattern"][key_signature])
-        print(f"signature_len: {signature_len}")
+        signature_len = len(supported_clef_settings[clef]["signature_position_pattern"][key_signature])        
         clef_width = 40
         return clef_width + (signature_len * 20)
 

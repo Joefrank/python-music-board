@@ -4,7 +4,7 @@ from datetime import datetime
 from Models import GrandStaff, Interval, MusicScore, Note
 from Models.Line import Line
 from Models.Position import Position
-from Configs.music_config import supported_clef_settings, supported_time_signatures, supported_modulations, lowest_note_code
+from Configs.music_config import NoteDurationInTicks, supported_clef_settings, supported_time_signatures, supported_modulations, lowest_note_code
 from Configs.screen_config import GenericConfig, StaffConfig, staff_generic_settings
 from Models.Staff import Staff
 from Services.Renderer.BaseRenderer import BaseRenderer
@@ -39,19 +39,23 @@ class StaffRenderer(BaseRenderer):
     """
         Renders all items like notes on lines and intervals
     """
-    def render_staff_all_collaterals(self, screen, staff, last_x_offset):
+    def render_staff_all_collaterals(self, screen, staff):
         for line in staff.lines:
             self.draw_line(line, screen)            
-            self.draw_staff_item_collaterals(screen, line, last_x_offset)
+            self.draw_staff_item_collaterals(screen, line)
+            if len(line.notes) > 0:
+                self.draw_staff_item_notes(screen, line)
 
         for interval in staff.intervals:
-            self.draw_staff_item_collaterals(screen, interval, last_x_offset)
+            self.draw_staff_item_collaterals(screen, interval)
+            if len(interval.notes) > 0:
+                self.draw_staff_item_notes(screen, interval)
 
         for line in staff.virtual_lines:
-            self.draw_staff_item_collaterals(screen, line, last_x_offset, nearest_staff=staff)            
+            self.draw_staff_item_collaterals(screen, line, nearest_staff=staff)            
 
         for interval in staff.virtual_intervals:
-            self.draw_staff_item_collaterals(screen, interval, last_x_offset, nearest_staff=staff)
+            self.draw_staff_item_collaterals(screen, interval, nearest_staff=staff)
 
 
     def render_staff(self, staff, screen): 
@@ -63,29 +67,18 @@ class StaffRenderer(BaseRenderer):
         _, _, end_offset = self.draw_time_signature(screen, staff.time_signature, Position(last_offset_x, staff.top_position.y))  
         # Collaterals are every music symbols to be drawn on or around the staff. 
         end_offset += 30            
-        self.render_staff_all_collaterals(screen, staff, end_offset)
+        self.render_staff_all_collaterals(screen, staff)
 
     """
         Draws any items in ApplicationState that collide with the line
     """
-    def draw_staff_item_collaterals(self, screen, staff_item, last_item_x_offset, nearest_staff=None):
+    def draw_staff_item_collaterals(self, screen, staff_item, nearest_staff=None):
         if self.state.current_mouse_over_position is None:
             return
-        
-        if staff_item.mouse_hovering_around(self.state.current_mouse_over_position, StaffConfig.STAFF_ITEM_THRESHOLD):
+
+        if staff_item.mouse_hovering_around(self.state.current_mouse_over_position, StaffConfig.STAFF_ITEM_THRESHOLD):            
             self.render_mouse_tracker(screen, self.state.current_mouse_over_position, staff_item.key_id)
             mouse_position = Position(self.state.current_mouse_over_position.x, self.state.current_mouse_over_position.y)           
-            
-            # now check if we have click event and display note.
-            if self.state.current_mouse_click_position is not None:
-                self.render_note_at_position(mouse_position, screen, staff_item)
-                if len(staff_item.key_id) == 3:
-                    modulation_key = staff_item.key_id[2]
-                else:
-                    modulation_key = None
-                piano_notes = StaffUtils.get_all_notes_by_modulation_key(modulation_key)
-                key_index = piano_notes.index(staff_item.key_id)                
-                self.sound_player.play_key(lowest_note_code + key_index)
 
             if staff_item.is_virtual and nearest_staff is not None:
                 moving_factor = 0
@@ -104,6 +97,9 @@ class StaffRenderer(BaseRenderer):
                 elif isinstance(staff_item, Interval):
                     self.draw_virtual_lines(screen, moving_factor, start_position, nearest_staff)
 
+            self.state.last_staff_item_hovered = self.state.current_staff_item_hovered
+            self.state.current_staff_item_hovered = staff_item
+
             self.state.previous_mouse_over_position = self.state.current_mouse_over_position
             self.state.current_mouse_over_position = None
             return self.state.previous_mouse_over_position
@@ -120,12 +116,20 @@ class StaffRenderer(BaseRenderer):
         note_duration = self.default_note_duration 
         note_order = staff_item.get_next_note_index()  
         note_extended = False     
-        new_note = Note(self, staff_item, note_duration, note_position, note_order, note_extended, 
-                        staff_item.key,staff_item.key_id)
+        new_note = Note(staff_item, note_duration, note_position, note_order, note_extended, staff_item.key,
+                        staff_item.key_id)
         staff_item.add_note(new_note)        
         self.draw_note(screen, note_duration, staff_item.key_id, 40, 30, note_position)
         self.state.previous_mouse_click_position = note_position
         self.state.current_mouse_click_position = None
+
+    def draw_staff_item_notes(self, screen, staff_item):
+        if staff_item.notes is None or len(staff_item.notes) == 0:
+            return
+        # if not then let's display all notes
+        for note in staff_item.notes:
+            print(f"note:{note.position} - len: {len(staff_item.notes)} - note:{note.key_id}")
+            self.draw_staff_item_note(screen, note)
 
     """
         Draws all virtual lines from position on top or bottom of staff all the way to it.
@@ -241,6 +245,9 @@ class StaffRenderer(BaseRenderer):
 
         return last_modulation_x_offset
     
+    """
+        Displays modulation at specific position # or b on line or interval
+    """
     def draw_modulation(self, screen, modulation_font_code, modulation_font_size, position, modulation_color=(0, 0, 0)):
         modulation_font = pygame.font.Font(GenericConfig.BRAVURA_FONT_PATH, modulation_font_size)
         modulation = modulation_font.render(modulation_font_code, True, modulation_color)

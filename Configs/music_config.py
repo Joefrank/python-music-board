@@ -17,10 +17,10 @@ musical_rests = [
 
 @dataclass
 class NoteDurationInTicks:
-    WHOLE: int = 1920,
-    HALF: int = 960,
-    QUARTER: int = 480,
-    EIGHT: float = 240,
+    WHOLE: int = 1920
+    HALF: int = 960
+    QUARTER: int = 480
+    EIGHT: float = 240
     SIXTHEENTH: float = 120
 
 

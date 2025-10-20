@@ -1,11 +1,14 @@
+from Models.Position import Position
+
+
 class Note:
-    duration = None # in beats
-    position = None # position to center rest around
-    line_order = None
-    extended = False
-    stackato = False
-    key = None
-    key_id = None
+    duration:int = None # in beats
+    position: Position = None # position to center rest around
+    order:int = None
+    extended:bool = False
+    stackato:bool = False
+    key:str = None
+    key_id:str = None
     beam_with = None # this is when we link to another note
 
     """
@@ -18,7 +21,7 @@ class Note:
         key_id: the exact piano music key to be played for this note
         beam_width: if this note has another key it is connected with.
     """
-    def __init__(self, staff_item, duration, position, order, extended, key, key_id, beam_width=None):
+    def __init__(self, staff_item, duration, position, order, extended, key, key_id, beam_with=None):
         self.staff_item = staff_item
         self.duration = duration
         self.position = position
@@ -26,4 +29,4 @@ class Note:
         self.extended = extended
         self.key = key
         self.key_id = key_id
-        self.beam_width = beam_width
+        self.beam_with = beam_with

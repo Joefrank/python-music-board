@@ -1,5 +1,6 @@
 import pygame
 
+from Models import Note
 from Models.Position import Position
 
 class BaseRenderer:
@@ -68,7 +69,10 @@ class BaseRenderer:
             pygame.draw.line(screen, (0, 0, 0), stem_start, stem_end, 2)
             position.translateTo(10, 0)
             self.draw_text(screen, note_name, position, 30, font_color=(200, 70, 70))
-            
+
+    def draw_staff_item_note(self, screen, note:Note):
+        self.draw_note(screen, self.default_note_duration, note.key_id, 40, 30, note.position)
+
     def draw_rect_surface(self, screen, width, height, surface_color, alpha, position):  
         # Create a temporary surface with per-pixel alpha
         rect_surface = pygame.Surface((width, height), pygame.SRCALPHA)

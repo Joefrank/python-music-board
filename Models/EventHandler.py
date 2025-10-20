@@ -2,17 +2,24 @@
 
 import pygame
 import logging
+from Configs.music_config import NoteDurationInTicks, default_note_duration
+from Models import Note
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.Position import Position
 from Services.Renderer.ScreenRenderer import ScreenRenderer
+from Services.Renderer.StaffRenderer import StaffRenderer
+from Services.Sound.PianoSoundPlayer import SoundPlayer
+from Services.Utils import StaffUtils
 
 class EventHandler:
     """Handles all user input events."""
 
-    def __init__(self, state: ApplicationState):
+    def __init__(self, state: ApplicationState, staff_renderer: StaffRenderer):
         self.state = state
         self.logger = logging.getLogger(__name__)
         self.screen_renderer = ScreenRenderer(state)
+        self.sound_player = state.sound_player
+        self.staff_renderer = staff_renderer
 
     def handle_events(self) -> None:
         """Process all pygame events."""
@@ -47,8 +54,27 @@ class EventHandler:
         self.state.needs_refresh = True
 
     def _handle_mouse_click(self, event) -> None:
-        if self.state.current_mouse_click_position is None:
-            self.state.current_mouse_click_position = Position(event.pos[0], event.pos[1])  
-        else:    
-            self.state.current_mouse_click_position.from_tuple(event.pos)
-        self.state.needs_refresh = True
+        if self.state.current_staff_item_hovered is not None:
+            mouse_position = Position(event.pos[0], event.pos[1])
+            staff_item = self.state.current_staff_item_hovered
+            key_code = StaffUtils.get_key_code_from_keyid(staff_item.key_id)
+            self.sound_player.play_piano_note(key_code, NoteDurationInTicks.QUARTER)           
+            
+            note_duration = default_note_duration 
+            note_order = staff_item.get_next_note_index()  
+            note_extended = False     
+            new_note = Note(staff_item, note_duration, mouse_position, note_order, note_extended, staff_item.key,
+                            staff_item.key_id)
+            staff_item.add_note(new_note)  
+
+            #self.staff_renderer.draw_staff_item_notes(self.state.main_canvass, staff_item)
+            #self.staff_renderer.render_note_at_position(mouse_position, self.state.main_canvass, staff_item)
+            self.state.last_staff_item_hovered = self.state.current_staff_item_hovered
+            self.state.current_staff_item_hovered = None
+            self.state.needs_refresh = True
+
+        # if self.state.current_mouse_click_position is None:
+        #     self.state.current_mouse_click_position =  mouse_position 
+        # else:    
+        #     self.state.current_mouse_click_position.from_tuple(event.pos)
+        
