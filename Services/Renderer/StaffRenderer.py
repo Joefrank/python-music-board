@@ -48,7 +48,14 @@ class StaffRenderer(BaseRenderer):
         last_offset_x += 30
         _, _, end_offset = self.draw_time_signature(screen, staff.time_signature, Position(last_offset_x, staff.top_position.y))  
         # Collaterals are every music symbols to be drawn on or around the staff. 
-        end_offset += 30            
+        end_offset += 30   
+
+        for intv in staff.intervals:
+            if len(intv.notes) > 0:
+                # filter out incorrect notes
+                intv.notes = [note for note in intv.notes if note.key_id == intv.key_id]
+
+            print(f"intv:{intv.key_id} - virtual: {intv.is_virtual} - len: {len(intv.notes)}")       
         self.render_staff_items(staff)
 
     """
@@ -63,8 +70,10 @@ class StaffRenderer(BaseRenderer):
     def render_staff_intervals(self, staff):
         for interval in staff.intervals:
             self.draw_staff_item_collaterals(interval)
+           
             if len(interval.notes) > 0:
-                self.draw_staff_item_notes(self.screen, interval)                  
+                print(f"interval draw: {interval.position_rect.top_left} - notepos: {interval.notes[0].position} - {len(interval.notes)}")
+                self.draw_staff_item_notes(interval)                  
 
         for interval in staff.virtual_intervals:
             self.draw_staff_item_collaterals(interval, nearest_staff=staff)
@@ -74,8 +83,8 @@ class StaffRenderer(BaseRenderer):
         for line in staff.lines:
             self.draw_line(line, self.screen)            
             self.draw_staff_item_collaterals(line)
-            if len(line.notes) > 0:
-                self.draw_staff_item_notes(self.screen, line)
+            #if len(line.notes) > 0:
+                #self.draw_staff_item_notes(self.screen, line)
 
         for line in staff.virtual_lines:
             self.draw_staff_item_collaterals(line, nearest_staff=staff) 
@@ -86,6 +95,21 @@ class StaffRenderer(BaseRenderer):
     def draw_staff_item_collaterals(self, staff_item, nearest_staff=None):
         if self.state.current_mouse_over_position is None:
             return
+        
+        if staff_item.clicked(self.state.current_mouse_click_position, StaffConfig.STAFF_ITEM_THRESHOLD):
+            # store note into this staff item.
+            note_duration = self.default_note_duration 
+            note_order = staff_item.get_next_note_index()  
+            note_extended = False   
+            print(f"rendering collaterals note at position. staffitemkey: {staff_item.key_id} - existing notes: {len(staff_item.notes)}")  
+                       
+            new_note = Note(staff_item, note_duration, self.state.current_mouse_click_position, note_order, note_extended, staff_item.key,
+                            staff_item.key_id)
+            staff_item.add_note(new_note)
+             
+            # adjust tracking variables
+            self.state.previous_mouse_click_position = self.state.current_mouse_click_position
+            self.state.current_mouse_click_position = None
 
         if staff_item.mouse_hovering_around(self.state.current_mouse_over_position, StaffConfig.STAFF_ITEM_THRESHOLD):            
             self.render_mouse_tracker(self.state.current_mouse_over_position, staff_item.key_id)
@@ -93,20 +117,18 @@ class StaffRenderer(BaseRenderer):
 
             if staff_item.is_virtual and nearest_staff is not None:
                 moving_factor = 0
+                start_position = mouse_position
+
                 # check if position is top or bottom of staff
                 if mouse_position.is_above_position(nearest_staff.top_position):
-                    start_position = mouse_position
-                    end_position = nearest_staff.top_position
                     moving_factor = 1 # top to bottom direction
-                elif mouse_position.is_below_position(nearest_staff.bottom_position):
-                    start_position = mouse_position
-                    end_position = nearest_staff.bottom_position
+                elif mouse_position.is_below_position(nearest_staff.bottom_position):                   
                     moving_factor = -1 # bottom to top direction
 
                 if isinstance(staff_item, Line):
-                    self.draw_virtual_lines(self.screen, moving_factor, start_position, nearest_staff, include_colliding_line=True)
+                    self.draw_virtual_lines(moving_factor, start_position, nearest_staff, include_colliding_line=True)
                 elif isinstance(staff_item, Interval):
-                    self.draw_virtual_lines(self.screen, moving_factor, start_position, nearest_staff)
+                    self.draw_virtual_lines(moving_factor, start_position, nearest_staff)
 
             #self.state.last_staff_item_hovered = self.state.current_staff_item_hovered
             #self.state.current_staff_item_hovered = staff_item
@@ -126,7 +148,8 @@ class StaffRenderer(BaseRenderer):
         # change note duration to key pressed
         note_duration = self.default_note_duration 
         note_order = staff_item.get_next_note_index()  
-        note_extended = False     
+        note_extended = False    
+        print("rendering note at position") 
         new_note = Note(staff_item, note_duration, note_position, note_order, note_extended, staff_item.key,
                         staff_item.key_id)
         staff_item.add_note(new_note)        
@@ -134,12 +157,12 @@ class StaffRenderer(BaseRenderer):
         self.state.previous_mouse_click_position = note_position
         self.state.current_mouse_click_position = None
 
-    def draw_staff_item_notes(self, screen, staff_item):
+    def draw_staff_item_notes(self, staff_item):
         if staff_item.notes is None or len(staff_item.notes) == 0:
             return
         # if not then let's display all notes
         for note in staff_item.notes:
-            print(f"note:{note.position} - len: {len(staff_item.notes)} - note:{note.key_id}")
+            #print(f"note:{note.position} - staffitemkey: {staff_item.key_id} - len: {len(staff_item.notes)} - note:{note.key_id}")
             self.draw_staff_item_note(note)
 
     """
@@ -149,20 +172,20 @@ class StaffRenderer(BaseRenderer):
         nearest_staff: closest staff to the mouse_position, 
         include_colliding_line: tells if we draw the line on mouse_position (True for lines and False for intervals)
     """
-    def draw_virtual_lines(self, screen, moving_factor, mouse_position, nearest_staff, include_colliding_line = False):
+    def draw_virtual_lines(self, moving_factor, mouse_position, nearest_staff, include_colliding_line = False):
         for line in nearest_staff.virtual_lines:# we only draw lines. intervals are visible between lines
             virtual_line_position = Position(mouse_position.x, line.start_position.y)
             # if mouse position is on top of staff
             if ((moving_factor == 1 and line.is_above_position(nearest_staff.top_position) 
                 and line.is_below_position(mouse_position))  
                 or (include_colliding_line and line.contains_position(mouse_position))): 
-                self.draw_virtual_line(screen, virtual_line_position, color=(255,0,0), 
+                self.draw_virtual_line(virtual_line_position, color=(255,0,0), 
                                        specified_line_width=StaffConfig.VIRTUAL_LINE_WIDTH)
             # if the mouse_position is below the staff
             elif ((moving_factor == -1 and line.is_below_position(nearest_staff.bottom_position)
                    and line.is_above_position(mouse_position)) 
                    or (include_colliding_line and line.contains_position(mouse_position))):
-                self.draw_virtual_line(screen, virtual_line_position, color=(0,0,255), 
+                self.draw_virtual_line(virtual_line_position, color=(0,0,255), 
                                        specified_line_width=StaffConfig.VIRTUAL_LINE_WIDTH)           
 
     def render_mouse_tracker(self, position, key_id):
@@ -179,11 +202,10 @@ class StaffRenderer(BaseRenderer):
         line: the line matching/holding our point/position
         position: the center of our virtual line (mouse position) 
     """ 
-    def draw_virtual_line(self, screen, position, color=(0, 0, 0), thickness=1, specified_line_width=20):            
+    def draw_virtual_line(self, position, color=(0, 0, 0), thickness=1, specified_line_width=20):            
         start_x = position.x - specified_line_width #- (specified_line_width // 2)
         end_x = start_x + specified_line_width
-        #print(f"line start: {start_x,position.y} - End: {end_x,  position.y} - mouse position:{position}") 
-        pygame.draw.line(screen, color, (start_x, position.y),
+        pygame.draw.line(self.screen, color, (start_x, position.y),
                          (end_x,  position.y), thickness) 
   
     """

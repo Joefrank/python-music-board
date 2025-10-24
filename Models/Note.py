@@ -30,3 +30,7 @@ class Note:
         self.key = key
         self.key_id = key_id
         self.beam_with = beam_with
+
+    def __str__(self):
+        return f"Note {self.key_id} - Position:{self.position} - Order: {self.order} - Extended:{self.extended}" + \
+            f" Stackato:{self.stackato} - Duration: {self.duration}"

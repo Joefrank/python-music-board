@@ -47,24 +47,21 @@ class MusicBoardApplication:
         grand_staff = self.init_staffs(window_width, default_time_signature, default_key_signature) 
         # use first staff to create music score
         self.music_score = self.score_builder_director.build_score(grand_staff, score_title, score_credits) 
-       
+        self.state.set_music_score(self.music_score)
         
 
     def run(self) -> None:
         """Run the main application loop."""
         try:
             self.logger.info("Starting main application loop")
-            clock = pygame.time.Clock()
+            #clock = pygame.time.Clock()
 
             while self.state.is_running:
                 # Handle events
                 self.event_handler.handle_events()
-
-                # Process music logic
-                #self.controller.process_note_placement()
-
+               
                 # Render frame
-                self.screen_renderer.render_frame(self.main_canvas, self.music_score)
+                self.screen_renderer.render_frame()
 
                 # Small delay to prevent excessive CPU usage
                 #pygame.time.wait(1)

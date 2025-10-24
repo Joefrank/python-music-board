@@ -29,6 +29,7 @@ class ApplicationState:
         self.main_canvass: Surface = None
         self.staff_renderer = None
         self.screen_renderer = None
+        self.music_score = None
 
     def set_renderers(self, staff_renderer, screen_renderer):
         self.staff_renderer = staff_renderer
@@ -36,6 +37,9 @@ class ApplicationState:
 
     def set_main_screen(self, screen: Surface):
         self.main_canvass = screen
+        
+    def set_music_score(self, score):
+        self.music_score = score
         
     #def set_note_duration(self, duration_details: Tuple[str, str, str, bool]) -> None:
       #  """Set the current note duration."""
