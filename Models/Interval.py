@@ -1,22 +1,17 @@
 class Interval:
-    is_virtual = False
-    vertical_positioning = 0
-    position_rect = None
-    key = None
-    key_id = None
-    notes = []
-    staff_index = None
-
+  
     def __init__(self, position_rect, key, key_id, is_virtual, vertical_positioning, staff_index, line_collateral_boundaries):
         self.staff_index = staff_index
         self.position_rect = position_rect
         self.key = key
         self.key_id = key_id
         self.is_virtual = is_virtual
+        self.notes = []
         self.vertical_positioning = vertical_positioning
         self.line_collateral_boundaries = line_collateral_boundaries
 
     def add_note(self, note):
+        print(f"note added. for keyid:{self.key_id}")
         self.notes.append(note)
 
     """
@@ -39,10 +34,7 @@ class Interval:
     def mouse_hovering_around(self, mouse_position, vertical_threshold=0):        
         return (self.is_within_collateral_boundaries(mouse_position) and
              (self.position_rect.top_left.y + vertical_threshold <= mouse_position.y 
-              <= self.position_rect.bottom_left.y - vertical_threshold))
-    
-    def add_note(self, note):
-        self.notes.append(note)
+              <= self.position_rect.bottom_left.y - vertical_threshold))    
 
     def get_next_note_index(self):
         return len(self.notes)

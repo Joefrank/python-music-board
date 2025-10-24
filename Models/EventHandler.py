@@ -47,37 +47,11 @@ class EventHandler:
         self.state.is_running = False
 
     def _handle_mouse_over(self, event) -> None:  ## only set this position active if it collides with item on score
-        if self.state.current_mouse_over_position is None:
-            self.state.current_mouse_over_position = Position(event.pos[0], event.pos[1])  
-        else:    
-            self.state.current_mouse_over_position.from_tuple(event.pos)
-        self.state.needs_refresh = True
+        self.state.mouse_hover.set_current_position(Position(event.pos[0], event.pos[1])) 
+        self.state.set_screen_refresh_status(True)
 
     def _handle_mouse_click(self, event) -> None:
-
-        if self.state.current_staff_item_hovered is not None:
-            mouse_position = Position(event.pos[0], event.pos[1])
-            staff_item = self.state.current_staff_item_hovered
-            key_code = StaffUtils.get_key_code_from_keyid(staff_item.key_id)
-            self.sound_player.play_piano_note(key_code, NoteDurationInTicks.QUARTER)           
-            
-            note_duration = default_note_duration 
-            note_order = staff_item.get_next_note_index()  
-            note_extended = False     
-            new_note = Note(staff_item, note_duration, mouse_position, note_order, note_extended, staff_item.key,
-                            staff_item.key_id)
-            staff_item.add_note(new_note)  
-
-            #self.staff_renderer.draw_staff_item_notes(self.state.main_canvass, staff_item)
-            #self.staff_renderer.render_note_at_position(mouse_position, self.state.main_canvass, staff_item)
-            
-            self.state.last_staff_item_hovered = self.state.current_staff_item_hovered
-            self.state.current_staff_item_hovered = None
-            
-            self.state.needs_refresh = True
-
-        # if self.state.current_mouse_click_position is None:
-        #     self.state.current_mouse_click_position =  mouse_position 
-        # else:    
-        #     self.state.current_mouse_click_position.from_tuple(event.pos)
+        self.state.mouse_click.set_current_position(Position(event.pos[0], event.pos[1]))
+        self.state.set_screen_refresh_status(True)
         
+       

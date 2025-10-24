@@ -1,17 +1,14 @@
 class MusicScore:
-    staves_sequence = [] #combination of all GrandStaves, could also be simple staffs
-    top_left_position = None   
-    staff_color = None
-    key_signature_list = None
-    score_width = None
-    title = None
-    title_position = None
-    highest_credit_y_offset = None
-    credits = [] # array of text blocks to be added to the top of score apart from title.
-    raw_credits = []
-    lyrics = []
+    
 
-    def __init__(self, top_left, score_width, title, credits):
+    def __init__(self, top_left, score_width, title, credits):        
+        self.staves_sequence = [] #combination of all GrandStaves, could also be simple staffs         
+        self.staff_color = None
+        self.key_signature_list = None
+        self.title_position = None
+        self.highest_credit_y_offset = None
+        self.credits = [] # array of text blocks to be added to the top of score apart from title.        
+        self.lyrics = []
         self.top_left_position = top_left
         self.score_width = score_width
         self.title = title

@@ -1,7 +1,5 @@
 class GrandStaff:   
-    top_left_position = None
-    bottom_right_position = None
-
+   
     def __init__(self, staves=None, top_left = (0, 0), bottom_right = (0, 0)):
         if staves is None:
             self.staves = []

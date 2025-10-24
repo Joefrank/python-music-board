@@ -27,14 +27,14 @@ class ScreenRenderer:
 
     def render_frame(self, screen, music_score) -> None:
         """Render a complete frame."""
-        try:
-            if self.state.needs_refresh:
-                self._clear_screen(screen)
-                self.score_renderer.render_score(screen, music_score)               
-                pygame.display.flip()
-                self.state.needs_refresh = False
-        except Exception as e:
-            self.logger.error(f"Rendering error: {e}")
+       # try:
+        if self.state.screen_needs_refresh:
+            self._clear_screen(screen)
+            self.score_renderer.render_score(screen, music_score)               
+            pygame.display.flip()
+            self.state.set_screen_refresh_status(False)
+        #except Exception as e:
+           # self.logger.error(f"Rendering error: {e}")
 
     def _clear_screen(self, screen) -> None:
         """Clear the screen with background color."""

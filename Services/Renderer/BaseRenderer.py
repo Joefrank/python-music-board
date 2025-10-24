@@ -57,21 +57,18 @@ class BaseRenderer:
         note_size: font-size, 
         position: bottom-left position
     """
-    def draw_note(self, note_duration_details, note_name, note_size, stem_height, position):
+    def draw_note(self, note_duration_details, note_name, note_size, stem_height, position, color=(100, 100, 100)):
         note_font_size = pygame.font.Font("fonts/Bravura.otf", note_size)
-        note = note_font_size.render(note_duration_details[2], True, (100, 100, 100))
+        note = note_font_size.render(note_duration_details[2], True, color)
         # Get its rect and move it
         note_rect = note.get_rect(center=position.get_tuple())
         self.screen.blit(note, note_rect)
 
         # draw stem only if config says so
         if note_duration_details[3]:
-            #y = position.y  # - note_size
             stem_start = (note_rect.right - 2, position.y)  # stem on right
             stem_end = (note_rect.right - 2, position.y - stem_height)
-            #print(f"stem_start: {stem_start} - stem_end: {stem_end}")
-            pygame.draw.line(self.screen, (0, 0, 0), stem_start, stem_end, 2)
-            position.translateTo(10, 0)
+            pygame.draw.line(self.screen, (0, 0, 0), stem_start, stem_end, 2)            
             self.draw_text(self.screen, note_name, position, 30, font_color=(200, 70, 70))
 
     def draw_staff_item_note(self, note:Note):

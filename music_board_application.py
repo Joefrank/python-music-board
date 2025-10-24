@@ -52,35 +52,35 @@ class MusicBoardApplication:
 
     def run(self) -> None:
         """Run the main application loop."""
-        try:
-            self.logger.info("Starting main application loop")
-            clock = pygame.time.Clock()
+       # try:
+        self.logger.info("Starting main application loop")
+        clock = pygame.time.Clock()
 
-            while self.state.is_running:
-                # Handle events
-                self.event_handler.handle_events()
+        while self.state.is_running:
+            # Handle events
+            self.event_handler.handle_events()
 
-                # Process music logic
-                #self.controller.process_note_placement()
+            # Process music logic
+            #self.controller.process_note_placement()
 
-                # Render frame
-                self.screen_renderer.render_frame(self.main_canvas, self.music_score)
+            # Render frame
+            self.screen_renderer.render_frame(self.main_canvas, self.music_score)
 
-                # Small delay to prevent excessive CPU usage
-                #pygame.time.wait(1)
-                
-                #clock.tick(3160)
-                #pygame.display.flip()
-                #self.staff_renderer.render_music_score(self.main_canvas, self.music_score)
-                pygame.time.wait(200)
+            # Small delay to prevent excessive CPU usage
+            #pygame.time.wait(1)
+            
+            #clock.tick(3160)
+            #pygame.display.flip()
+            #self.staff_renderer.render_music_score(self.main_canvas, self.music_score)
+            pygame.time.wait(200)
 
-        except KeyboardInterrupt:
-            self.logger.info("Application interrupted by user")
-        except Exception as e:
-            self.logger.error(f"Unexpected error in main loop: {e}")
-            raise MusicBoardApplicationError(f"Main loop failed: {e}") from e
-        finally:
-            self.cleanup()
+        #except KeyboardInterrupt:
+            #self.logger.info("Application interrupted by user")
+        #except Exception as e:
+           # self.logger.error(f"Unexpected error in main loop: {e}")
+            #raise MusicBoardApplicationError(f"Main loop failed: {e}") from e
+        #finally:
+            #self.cleanup()
 
     def cleanup(self) -> None:
         """Clean up application resources."""

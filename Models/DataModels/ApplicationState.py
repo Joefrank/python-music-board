@@ -2,23 +2,17 @@
 
 from dataclasses import dataclass, field
 from typing import Optional, List, Tuple
-
 from pygame import Surface
+from Configs.screen_config import MouseEventType
+from Models.MouseEvent import MouseEvent
 from Models.Position import Position
-# from Services.Renderer.ScreenRenderer import ScreenRenderer
-# from Services.Renderer.StaffRenderer import StaffRenderer
 from Services.Sound.PianoSoundPlayer import SoundPlayer
 
-@dataclass
+
 class ApplicationState:
     """Manages the current state of the application."""  
     
     is_running: bool = True
-    needs_refresh: bool = True
-    previous_mouse_over_position: Position = None
-    current_mouse_over_position: Position = None
-    previous_mouse_click_position: Position = None
-    current_mouse_click_position: Position = None
     last_staff_item_hovered = None #line/interval
     current_staff_item_hovered = None #line/interval
 
@@ -30,6 +24,10 @@ class ApplicationState:
         self.staff_renderer = None
         self.screen_renderer = None
 
+        self.screen_needs_refresh = False
+        self.mouse_click = MouseEvent(MouseEventType.CLICK)
+        self.mouse_hover = MouseEvent(MouseEventType.HOVER)
+
     def set_renderers(self, staff_renderer, screen_renderer):
         self.staff_renderer = staff_renderer
         self.screen_renderer = screen_renderer
@@ -37,6 +35,9 @@ class ApplicationState:
     def set_main_screen(self, screen: Surface):
         self.main_canvass = screen
         
+    def set_screen_refresh_status(self, needs_refresh: bool):
+        self.screen_needs_refresh = needs_refresh
+
     #def set_note_duration(self, duration_details: Tuple[str, str, str, bool]) -> None:
       #  """Set the current note duration."""
         #self.current_note_duration = duration_details

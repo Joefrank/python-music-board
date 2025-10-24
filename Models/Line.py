@@ -1,14 +1,4 @@
-class Line:
-    is_virtual = False
-    staff_index = None
-    vertical_positioning = 0
-    start_position = None
-    end_position = None
-    key = None
-    key_id = None
-    notes = []
-    thickness = None
-    
+class Line:    
 
     def __init__(self, start_position, end_position, thickness, is_virtual, key, key_id, vertical_positioning,
                   staff_index, line_collateral_boundaries):
@@ -21,9 +11,11 @@ class Line:
         self.is_virtual = is_virtual
         self.vertical_positioning = vertical_positioning
         self.line_collateral_boundaries = line_collateral_boundaries
+        self.notes = []
 
 
     def add_note(self, note):
+        print(f"note added. for keyid:{self.key_id}")
         self.notes.append(note)
 
     def is_in_vertical_proximity_of_position(self, position, vertical_threshold=0):
@@ -49,9 +41,6 @@ class Line:
     
     def is_below_position(self, position):
         return self.start_position.y > position.y and self.end_position.y > position.y
-
-    def add_note(self, note):
-        self.notes.append(note)
 
     def get_next_note_index(self):
         return len(self.notes)

@@ -1,12 +1,8 @@
-
-
-class Position:
-    x = 0.0
-    y = 0.0
+class Position:   
 
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.x:int = x
+        self.y:int = y
 
     """
         Compares this point with another to see if they are the same.

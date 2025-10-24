@@ -2,14 +2,6 @@ from Models.Position import Position
 
 
 class Note:
-    duration:int = None # in beats
-    position: Position = None # position to center rest around
-    order:int = None
-    extended:bool = False
-    stackato:bool = False
-    key:str = None
-    key_id:str = None
-    beam_with = None # this is when we link to another note
 
     """
         staff_item: line/interval containing this note
@@ -21,12 +13,16 @@ class Note:
         key_id: the exact piano music key to be played for this note
         beam_width: if this note has another key it is connected with.
     """
-    def __init__(self, staff_item, duration, position, order, extended, key, key_id, beam_with=None):
+    def __init__(self, duration, position, order, extended, key, key_id, beam_with=None):
+        #self.staff_item = staff_item
+        self.duration:int = duration # in beats
+        self.position:Position = position # position to center rest around
+        self.order:int = order
+        self.extended:bool = extended
+        self.stackato:bool = None
+        self.key:str = key
+        self.key_id:str = key_id
+        self.beam_with:Note = beam_with # this is when we link to another note
+
+    def set_parent(self, staff_item):
         self.staff_item = staff_item
-        self.duration = duration
-        self.position = position
-        self.order = order
-        self.extended = extended
-        self.key = key
-        self.key_id = key_id
-        self.beam_with = beam_with

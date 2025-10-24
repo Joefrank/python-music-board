@@ -2,6 +2,11 @@ from dataclasses import dataclass
 from typing import Tuple
 
 @dataclass
+class MouseEventType:
+    CLICK = "click"
+    HOVER = "hover"
+
+@dataclass
 class WindowConfig:
     """Window configuration settings."""
     WIDTH: int = 1200

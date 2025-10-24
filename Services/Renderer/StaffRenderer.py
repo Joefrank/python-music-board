@@ -63,9 +63,7 @@ class StaffRenderer(BaseRenderer):
     def render_staff_intervals(self, staff):
         for interval in staff.intervals:
             self.draw_staff_item_collaterals(interval)
-            if len(interval.notes) > 0:
-                self.draw_staff_item_notes(self.screen, interval)                  
-
+           
         for interval in staff.virtual_intervals:
             self.draw_staff_item_collaterals(interval, nearest_staff=staff)
 
@@ -74,9 +72,7 @@ class StaffRenderer(BaseRenderer):
         for line in staff.lines:
             self.draw_line(line, self.screen)            
             self.draw_staff_item_collaterals(line)
-            if len(line.notes) > 0:
-                self.draw_staff_item_notes(self.screen, line)
-
+           
         for line in staff.virtual_lines:
             self.draw_staff_item_collaterals(line, nearest_staff=staff) 
 
@@ -84,12 +80,27 @@ class StaffRenderer(BaseRenderer):
         Draws any items in ApplicationState that collide with the line
     """
     def draw_staff_item_collaterals(self, staff_item, nearest_staff=None):
-        if self.state.current_mouse_over_position is None:
+        mouse_over_position = self.state.mouse_hover.get_current_position()
+        mouse_click_position = self.state.mouse_click.get_current_position()
+        
+        # check if it matches this staff item and render note potentially
+        if (mouse_click_position is not None 
+            and staff_item.mouse_hovering_around(mouse_click_position, StaffConfig.STAFF_ITEM_THRESHOLD)):
+            print(f"staff item notes:{len(staff_item.notes)} - {staff_item.key_id}")
+            self.render_note_at_position(mouse_click_position, staff_item)
+            self.state.mouse_click.reset_current_position()
+
+        # if staff item has notes, we want to display them.
+        if len(staff_item.notes) > 0:
+            for note in staff_item.notes:
+                self.draw_note(note.duration, note.key_id, 40, 30, note.position, color=(25,25,25)) 
+
+        if mouse_over_position is None:
             return
 
-        if staff_item.mouse_hovering_around(self.state.current_mouse_over_position, StaffConfig.STAFF_ITEM_THRESHOLD):            
-            self.render_mouse_tracker(self.state.current_mouse_over_position, staff_item.key_id)
-            mouse_position = Position(self.state.current_mouse_over_position.x, self.state.current_mouse_over_position.y)           
+        if staff_item.mouse_hovering_around(mouse_over_position, StaffConfig.STAFF_ITEM_THRESHOLD):            
+            self.render_mouse_tracker(mouse_over_position, staff_item.key_id)
+            mouse_position = Position(mouse_over_position.x, mouse_over_position.y)           
 
             if staff_item.is_virtual and nearest_staff is not None:
                 moving_factor = 0
@@ -108,38 +119,32 @@ class StaffRenderer(BaseRenderer):
                 elif isinstance(staff_item, Interval):
                     self.draw_virtual_lines(self.screen, moving_factor, start_position, nearest_staff)
 
-            #self.state.last_staff_item_hovered = self.state.current_staff_item_hovered
-            #self.state.current_staff_item_hovered = staff_item
-
-            self.state.previous_mouse_over_position = self.state.current_mouse_over_position
-            self.state.current_mouse_over_position = None
-            return self.state.previous_mouse_over_position
+            self.state.mouse_hover.reset_current_position()
         
-    def render_note_at_position(self, mouse_position, screen, staff_item):
-        # Adjust position to be position of staff_item (line/interval)
-        if isinstance(staff_item, Line):
-            note_position = Position(mouse_position.x, staff_item.start_position.y)
-        elif isinstance(staff_item, Interval):
-            rect = staff_item.position_rect
-            y_offset = rect.bottom_left.y - rect.top_left.y // 2
-            note_position = Position(mouse_position.x, y_offset)
-        # change note duration to key pressed
-        note_duration = self.default_note_duration 
-        note_order = staff_item.get_next_note_index()  
-        note_extended = False     
-        new_note = Note(staff_item, note_duration, note_position, note_order, note_extended, staff_item.key,
-                        staff_item.key_id)
-        staff_item.add_note(new_note)        
-        self.draw_note(note_duration, staff_item.key_id, 40, 30, note_position)
-        self.state.previous_mouse_click_position = note_position
-        self.state.current_mouse_click_position = None
+    def render_note_at_position(self, mouse_position, staff_item):
+         # Adjust position to be position of staff_item (line/interval)
+         if isinstance(staff_item, Line):
+             note_position = Position(mouse_position.x, staff_item.start_position.y)
+         elif isinstance(staff_item, Interval):
+             rect = staff_item.position_rect
+             y_offset =  ((rect.bottom_left.y - rect.top_left.y) // 2)
+             note_position = Position(mouse_position.x, rect.top_left.y + y_offset)
+             print(f"Render note on interval pos:{note_position} - y_offset:{y_offset} - rect-top-left: {rect.top_left} - bottom-left:{rect.bottom_left}")
+         # change note duration to key pressed
+         note_duration = self.default_note_duration 
+         note_order = staff_item.get_next_note_index()  
+         note_extended = False     
+         new_note = Note(note_duration, note_position, note_order, note_extended, staff_item.key,
+                         staff_item.key_id)
+         new_note.set_parent(staff_item)
+         staff_item.add_note(new_note)                
+         self.draw_note(note_duration, staff_item.key_id, 40, 30, note_position, color=(255,100,100))         
 
     def draw_staff_item_notes(self, screen, staff_item):
         if staff_item.notes is None or len(staff_item.notes) == 0:
             return
         # if not then let's display all notes
         for note in staff_item.notes:
-            print(f"note:{note.position} - len: {len(staff_item.notes)} - note:{note.key_id}")
             self.draw_staff_item_note(note)
 
     """
