@@ -49,3 +49,5 @@ class SoundPlayer:
     def play_note_crescendo(self, note_key_code, duration_ticks, cresendo_steps):
         for v in range(len(cresendo_steps)):  # 40, 60, 80, 100
             self.play_note(note_key_code, duration_ticks, velocity=v)
+
+    

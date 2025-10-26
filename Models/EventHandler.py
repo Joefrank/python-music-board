@@ -2,7 +2,6 @@
 
 import pygame
 import logging
-from Configs.music_config import NoteDurationInTicks, default_note_duration
 from Models import Note
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.Position import Position
@@ -31,10 +30,10 @@ class EventHandler:
                     self._handle_mouse_over(event)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                    self._handle_mouse_click(event)                
-                #elif event.type == pygame.KEYDOWN:
-                    #self._handle_key_down(event)
-                #elif event.type == pygame.KEYUP:
-                  #  self._handle_key_up(event)
+                elif event.type == pygame.KEYDOWN:
+                    self._handle_key_down(event)
+                elif event.type == pygame.KEYUP:
+                    self._handle_key_up()
                 #elif event.type == pygame.VIDEORESIZE:
                    # self._handle_window_resize(event)
             except Exception as e:
@@ -47,11 +46,35 @@ class EventHandler:
         self.state.is_running = False
 
     def _handle_mouse_over(self, event) -> None:  ## only set this position active if it collides with item on score
-        self.state.mouse_hover.set_current_position(Position(event.pos[0], event.pos[1])) 
-        self.state.set_screen_refresh_status(True)
+        # we don't want to show mouse tracker when unary key modifiers are down
+        note_modifier = self.state.get_registered_note_modifier()
+        if note_modifier is None or note_modifier[1] == 2:
+            self.state.mouse_hover.set_current_position(Position(event.pos[0], event.pos[1])) 
+            self.state.set_screen_refresh_status(True)
 
     def _handle_mouse_click(self, event) -> None:
-        self.state.mouse_click.set_current_position(Position(event.pos[0], event.pos[1]))
-        self.state.set_screen_refresh_status(True)
+        # check if there are modifiers, that will determine what to do with mouse click
+        note_modifier = self.state.get_registered_note_modifier()
+        click_position = Position(event.pos[0], event.pos[1])
+        nearest_note = None
+        # if any modifier (key down) has been registered before click. unary modifier only in this case
+        if note_modifier is not None and note_modifier[1] == 1:
+            # check if there is any note near click and modify it           
+            nearest_note = self.state.check_click_around_note(click_position)
+            print(f"nearest: {nearest_note}")
+            if nearest_note is not None:
+                self.state.effect_note_modifier(nearest_note, note_modifier)
+
+        # this will cause a new note to be added if no nearest note has been found.
+        if nearest_note is None:
+            self.state.mouse_click.set_current_position(click_position)
+            self.state.set_screen_refresh_status(True)
         
-       
+    def _handle_key_down(self, event) -> None:
+        key_name = pygame.key.name(event.key).upper()
+        self.state.register_key_down(key_name)
+
+    def _handle_key_up(self) -> None:
+        self.state.cancel_key_down()
+
+    

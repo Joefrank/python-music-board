@@ -1,5 +1,5 @@
-from Configs.music_config import (MODULATION_FLAT, MODULATION_FLAT_KEY, MODULATION_SHARP, MODULATION_SHARP_KEY, 
-    piano_notes_sharps, piano_notes_flats, lowest_note_code)
+from Configs.music_config import (MODULATION_FLAT, MODULATION_FLAT_KEY, MODULATION_SHARP, MODULATION_SHARP_KEY, NoteModifierDetails, 
+    piano_notes_sharps, piano_notes_flats, lowest_note_code, note_modifiers)
 from Models import GrandStaff
 from Models.Position import Position
 from Models.Staff import Staff
@@ -109,3 +109,21 @@ class StaffUtils:
         key_index = piano_notes.index(key_id)     
         return lowest_note_code + key_index  
         
+    @staticmethod
+    def get_modifier_by_key(key):
+        if key not in note_modifiers:
+            return None
+        
+        match key:
+            case 's' | 'S':                 
+                 return NoteModifierDetails.STACCATO
+            case 'x' | 'X':
+                 return NoteModifierDetails.EXTEND
+            case 'b' | 'B':
+                 return NoteModifierDetails.BEAM
+            case 'd' | 'D':
+                 return NoteModifierDetails.DELETE
+            case 'c' | 'C':
+                 return NoteModifierDetails.CONNECT
+            case 'i' | 'I':
+                 return NoteModifierDetails.INVERT_STEM

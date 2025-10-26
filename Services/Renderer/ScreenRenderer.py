@@ -2,18 +2,17 @@ import logging
 import pygame
 from Configs import screen_config
 from Models.DataModels.ApplicationState import ApplicationState
+from Services.Renderer.BaseRenderer import BaseRenderer
 from Services.Renderer.MusicScoreRenderer import MusicScoreRenderer
 
 
-class ScreenRenderer:
-    RED = (255, 0, 0)
-    main_canvas = None
+class ScreenRenderer(BaseRenderer):  
 
-    def __init__(self, state: ApplicationState):
+    def __init__(self, state):
+        super().__init__(state)
         self.main_canvas = None
         self.logger = logging.getLogger(__name__)
-        self.score_renderer = MusicScoreRenderer(state)        
-        self.state = state
+        self.score_renderer = MusicScoreRenderer(state) 
 
     def init_screen(self, width, height, caption, background_color=(30, 30, 30)):
         pygame.init()
@@ -22,15 +21,12 @@ class ScreenRenderer:
         pygame.display.set_caption(caption)
         return self.main_canvas
 
-    def render_mouse_tracker(self, screen, position):
-        pygame.draw.circle(screen, self.RED, position, 5)
-
-    def render_frame(self, screen, music_score) -> None:
+    def render_frame(self) -> None:
         """Render a complete frame."""
        # try:
         if self.state.screen_needs_refresh:
-            self._clear_screen(screen)
-            self.score_renderer.render_score(screen, music_score)               
+            self._clear_screen(self.state.main_canvass)
+            self.score_renderer.render_score(self.state.main_canvass, self.state.music_score)               
             pygame.display.flip()
             self.state.set_screen_refresh_status(False)
         #except Exception as e:

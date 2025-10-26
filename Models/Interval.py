@@ -11,7 +11,6 @@ class Interval:
         self.line_collateral_boundaries = line_collateral_boundaries
 
     def add_note(self, note):
-        print(f"note added. for keyid:{self.key_id}")
         self.notes.append(note)
 
     """
@@ -39,6 +38,16 @@ class Interval:
     def get_next_note_index(self):
         return len(self.notes)
    
+    def delete_note(self, note):
+         if note in self.notes:
+            self.notes.remove(note)
+
+    def find_nearest_note(self, position):
+        for note in self.notes:            
+            if note.is_near_position(position):
+                return note        
+        return None
+    
     def __str__(self):
         return (f"\n{"Virtual " if self.is_virtual else ""}Interval #{self.staff_index} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Top-Left{self.position_rect.top_left} - Top-Right: {self.position_rect} "
                 f"- Bottom-Left: {self.position_rect.bottom_left} - Bottom-Right: {self.position_rect.bottom_right}"

@@ -16,3 +16,10 @@ class GrandStaff:
     def set_bottom_right_position(self, bottom_right):
         self.bottom_right_position = bottom_right
 
+    def find_nearest_note(self, position):
+        for staff in self.staves:
+            note = staff.find_nearest_note(position)
+            if note is not None:
+                return note
+        return None
+

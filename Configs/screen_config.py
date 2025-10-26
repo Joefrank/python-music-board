@@ -2,6 +2,13 @@ from dataclasses import dataclass
 from typing import Tuple
 
 @dataclass
+class Color:
+    BLACK = (25,25,25)
+    RED = (255,0,0)
+    GREY = (100,100,100)
+    BLUE = (25, 25, 255)
+
+@dataclass
 class MouseEventType:
     CLICK = "click"
     HOVER = "hover"
@@ -32,6 +39,7 @@ class StaffConfig:
     STAFF_ORIGINAL_Y_OFFSET: int = 200 # this is where the first staff will be placed. all subsequent will be calculated from this
     VIRTUAL_LINE_WIDTH:  int = 20
     STAFF_ITEM_THRESHOLD: int = 2
+    STACCATO_SYMBOL_SIZE: int = 40
     
 @dataclass
 class GenericConfig:

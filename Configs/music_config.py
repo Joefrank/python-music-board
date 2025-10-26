@@ -7,6 +7,7 @@ MODULATION_FLAT = "MODULATION_FLAT"
 TREBLE_CLEF = "TREBLE_CLEF"
 BASS_CLEF = "BASS_CLEF"
 
+
 musical_rests = [
     {"name": "Whole rest", "no_of_beats": 4, "font_code": "\uE4E3"},
     {"name": "Half rest", "no_of_beats": 2, "font_code": "\uE4E4"},
@@ -14,6 +15,18 @@ musical_rests = [
     {"name": "Eighth rest", "no_of_beats": 0.5, "font_code": "\uE4E6"},
     {"name": "Sixteenth rest", "no_of_beats": 0.25, "font_code": "\uE4E7"}
 ]
+
+note_modifiers = ['s','x','b','d','c','i','S','X','B','D','C','I']
+
+@dataclass
+class NoteModifierDetails:
+    # format is [list] of keys, no of items affected by modifier
+    DELETE = (['D','d'], 1) # delete single note when this key pressed and click on note
+    EXTEND = (['X', 'x'], 1) # extend new/existing note by half its duration on this key press + click 
+    STACCATO = (['S','s'], 1) # make new/existing note staccato on key press + click
+    INVERT_STEM = (['I', 'i'], 1) # invert stem of new/existing note on key press + click
+    BEAM = (['B', 'b'], 2) # beem this note to previous if it exist.
+    CONNECT = (['C', 'c'], 2) # connect this note to previous if one exist
 
 @dataclass
 class NoteDurationInTicks:
@@ -23,17 +36,21 @@ class NoteDurationInTicks:
     EIGHT: float = 240
     SIXTHEENTH: float = 120
 
+@dataclass
+class NoteOptions:
+    STACCATO:str = "\uE4A2"
+
 
 valid_note_durations = \
     [ #(duration, note_type font_code, stem-on/off, Actual duration)
         ("1","Whole", "\uE0A2",False, NoteDurationInTicks.WHOLE),
         ("2","Half", "\uE0A2", True, NoteDurationInTicks.HALF),
         ("4","Quarter","\uE0A4", True, NoteDurationInTicks.QUARTER),
-        ("8","Eighth","\uE0A4", True, NoteDurationInTicks.EIGHT),
-        ("0","Sixteenth","\uE0A4", True, NoteDurationInTicks.SIXTHEENTH)
+        ("8","Eighth","\U0001D160", False, NoteDurationInTicks.EIGHT),
+        ("0","Sixteenth","\U0001D161", False, NoteDurationInTicks.SIXTHEENTH)
     ]
 
-default_note_duration = ("4","Quarter","\uE0A4", True)
+default_note_duration = next((item for item in valid_note_durations if item[0] == "4"), None)
 
 supported_time_signatures = {
     "2x2":{"fraction" : (2,2), "symbol" : ("\uE082","\uE082"), "size":40, "margins": (0, 10, 0, 12)},

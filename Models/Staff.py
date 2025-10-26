@@ -41,6 +41,17 @@ class Staff:
     def get_height(self):
         return self.bottom_position.y - self.top_position.y 
 
+    def find_nearest_note(self, position):
+        for line in self.lines:
+            note = line.find_nearest_note(position)
+            if note is not None:
+                return note
+        for interval in self.intervals:
+            note = interval.find_nearest_note(position)
+            if note is not None:
+                return note
+        return None
+    
     def __str__(self):
         lines_str = "-> ".join(str(line) for line in self.lines)
         intervals_str = "-> ".join(str(interval) for interval in self.intervals)

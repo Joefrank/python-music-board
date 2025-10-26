@@ -15,7 +15,6 @@ class Line:
 
 
     def add_note(self, note):
-        print(f"note added. for keyid:{self.key_id}")
         self.notes.append(note)
 
     def is_in_vertical_proximity_of_position(self, position, vertical_threshold=0):
@@ -44,6 +43,16 @@ class Line:
 
     def get_next_note_index(self):
         return len(self.notes)
+    
+    def delete_note(self, note):
+        if note in self.notes:
+            self.notes.remove(note)
+
+    def find_nearest_note(self, position):
+        for note in self.notes:            
+            if note.is_near_position(position):
+                return note        
+        return None
     
     def __str__(self):
         return f"\n{"Virtual " if self.is_virtual else ""}Line #{self.staff_index} - Thickness: {self.thickness} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Start: {self.start_position} - End: {self.end_position}"
