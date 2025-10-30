@@ -1,11 +1,10 @@
-from Services.Builders import *
-from Services.Builders import MusicScoreBuilder
+from Services.Builders.MusicScoreBuilder import MusicScoreBuilder
 
 class MusicScoreBuilderDirector:
     
     def __init__(self):
         self.music_score = None
-        self.music_score_builder = MusicScoreBuilder.MusicScoreBuilder()
+        self.music_score_builder = MusicScoreBuilder()
     
     def build_score(self, grand_staff, score_title, score_credits):
         self.music_score = self.music_score_builder \

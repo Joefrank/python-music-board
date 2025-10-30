@@ -6,8 +6,10 @@ from Configs.music_config import BASS_CLEF, TREBLE_CLEF
 from Models import MusicScore
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.EventHandler import EventHandler
+from Models.Menu.MenuData import MenuData
+from Models.Position import Position
 from Models.exceptions import MusicBoardApplicationError
-from Services.Builders import MusicScoreBuilderDirector, StaffBuilderDirector
+from Services.Builders import MenuBuilder, MusicScoreBuilderDirector, StaffBuilderDirector
 from Services.Renderer.StaffRenderer import StaffRenderer
 from Services.Renderer.ScreenRenderer import ScreenRenderer
 from Configs.screen_config import StaffConfig
@@ -23,10 +25,11 @@ class MusicBoardApplication:
         self.screen_renderer = ScreenRenderer(self.state)
         self.state.set_renderers(self.staff_renderer,self.screen_renderer)
         self.logger = logging.getLogger(__name__)        
-        self.event_handler = EventHandler(self.state, self.staff_renderer)
+        self.event_handler = EventHandler(self.state)
         self.staff_builder_director = StaffBuilderDirector()        
         self.score_builder_director = MusicScoreBuilderDirector.MusicScoreBuilderDirector()
         self.music_score = None
+        self.menu_builder = MenuBuilder.MenuBuilder()
 
     def initialize(self) -> None:
         """ Initializes everything to do with music-board application """
@@ -37,12 +40,26 @@ class MusicBoardApplication:
             ["KREMSER Irregular", "Netherland Folk Song, 1625","Arr. by Edward Kremser (1838-1914)"]
         ]
         window_width, window_height = screen_config.WindowConfig.WIDTH, screen_config.WindowConfig.HEIGHT
+        self.state.screen_width = window_width
+        self.state.screen_height = window_height
+        
         # init the main window
         self.main_canvas = self.screen_renderer.init_screen(window_width, window_height, screen_config.WindowConfig.CAPTION,
                                                     screen_config.WindowConfig.BACKGROUND_COLOR)
         #self.state.set_main_screen(self.main_canvas)
         self.state.set_main_screen(self.main_canvas)
         
+        # init the main menu
+        menu_items = [MenuData("Reset", "Click to reset everything.", self.menu_reset_action),
+                      MenuData("Play", "Click to play the score.", self.menu_play_notes),
+                      MenuData("Save", "Click to save the score.", self.menu_save_score)]
+        main_menu = self.menu_builder \
+            .set_menu_position(Position(0,0)) \
+                .build_items(menu_items) \
+                    .set_item_positions() \
+                        .build()
+        self.state.set_main_menu(main_menu)
+
         # init the first staff
         grand_staff = self.init_staffs(window_width, default_time_signature, default_key_signature) 
         # use first staff to create music score
@@ -103,6 +120,14 @@ class MusicBoardApplication:
                                                                     time_signature, key_signature)
         return grand_staff
     
+    def menu_reset_action(self):
+        print('resetting all')
+
+    def menu_play_notes(self):
+        print('playing all notes on score')
+
+    def menu_save_score(self):
+        print('saving score')
    
         
     

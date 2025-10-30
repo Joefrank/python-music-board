@@ -1,12 +1,16 @@
 from dataclasses import dataclass
 from typing import Tuple
 
+
 @dataclass
 class Color:
     BLACK = (25,25,25)
     RED = (255,0,0)
     GREY = (100,100,100)
     BLUE = (25, 25, 255)
+    SKYBLUE = (144,212,255)
+    WHITE = (255,255,255)
+    PINK = (255, 192, 203)
 
 @dataclass
 class MouseEventType:
@@ -21,6 +25,23 @@ class WindowConfig:
     CAPTION: str = "AI Piano Music Board"
     BACKGROUND_COLOR: Tuple[int, int, int] = (250, 250, 250)
     RESIZABLE: bool = True
+
+#background_color, width, height, item_width, item_height
+@dataclass
+class MainMenuConfig:
+    BACKGROUND_COLOR = Color.SKYBLUE
+    WIDTH = WindowConfig.WIDTH
+    HEIGHT = 50
+    
+@dataclass
+class MenuItemConfig:
+    WIDTH = 150
+    HEIGHT = MainMenuConfig.HEIGHT - 16
+    BACKGROUND_COLOR = Color.BLUE
+    TEXT_COLOR = Color.WHITE
+    HOVER_COLOR = Color.PINK
+    SELECTED_COLOR = Color.RED
+    FONT_SIZE = 30
 
 @dataclass
 class StaffConfig:

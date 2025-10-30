@@ -42,12 +42,10 @@ class BaseRenderer:
         if text_alignment == "RIGHT":
             text_rect = text_renderer.get_rect()
             text_rect.topright = (position.x, position.y) # 20 px for padding
-            #print(position)
             screen.blit(text_renderer, text_rect)
         elif text_alignment == "CENTER": # position here is the will be x: staff_top_left and y where you want title
             text_block_x = (container_width // 2) - (text_renderer.get_width() // 2)
             screen.blit(text_renderer, (position.x + text_block_x, position.y))
-            #print((position.x + text_block_x, position.y))
         else:
             screen.blit(text_renderer, (position.x, position.y))  # White color text
 
@@ -91,14 +89,14 @@ class BaseRenderer:
         note_rect = self.render_symbol(StaffConfig.STAFF_NOTE_SIZE, note.duration[2], note.position, note_color)
         # check for extention - staccato
         if note.staccato:
-            stacc_position = Position(note.position.x, note.position.y + 10)
+            staccato_offset = note.position.y - 7 if note.stem_inverted else note.position.y + 10
+            stacc_position = Position(note.position.x, staccato_offset)
             self.render_symbol(StaffConfig.STACCATO_SYMBOL_SIZE, NoteOptions.STACCATO, stacc_position, note_color)
         
         # check note extension
         if note.extended:
-            extended_position = Position(note.position.x + 10, note.position.y)
+            extended_position = Position(note.position.x + 12, note.position.y)
             self.render_symbol(StaffConfig.STACCATO_SYMBOL_SIZE, NoteOptions.STACCATO, extended_position, note_color)
-
 
         # draw stem only if config says so
         if note.duration[3]:

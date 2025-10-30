@@ -82,7 +82,6 @@ class StaffBuilderDirector:
         self.staff_builder.set_position() 
         return current_staff
     
-    #def build_grand_staff(self, staff_original_position, staff_with, StaffConfig, clef_tuple, time_signature, key_signature):
     def build_grand_staff(self, window_width, StaffConfig, clef_tuple, time_signature, key_signature):
         # work out first staff position and width
         staff_with, staff_original_position = self.calculate_first_staff_position(window_width,

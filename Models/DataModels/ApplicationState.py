@@ -7,6 +7,7 @@ from Configs.screen_config import MouseEventType
 from Configs.music_config import valid_note_durations, note_modifiers
 from Models import MusicScore, Note
 from Models.GrandStaff import GrandStaff
+from Models.Menu import MainMenu
 from Models.MouseEvent import MouseEvent
 from Models.Position import Position
 from Models.Staff import Staff
@@ -31,6 +32,9 @@ class ApplicationState:
         self.mouse_hover = MouseEvent(MouseEventType.HOVER)
         self.note_duration = None
         self.note_modifier = None
+        self.main_menu = None
+        self.screen_width = None
+        self.screen_height = None
 
     def set_renderers(self, staff_renderer, screen_renderer):
         self.staff_renderer = staff_renderer
@@ -67,6 +71,10 @@ class ApplicationState:
                 self.note_duration = note_duration_details # this is font code
         elif key_name in note_modifiers:
             self.note_modifier = StaffUtils.get_modifier_by_key(key_name)
+            # if key is unary, we want to clear mouse over recording
+            if self.note_modifier[1] == 1:
+                self.mouse_hover.reset_current_position()
+                self.set_screen_refresh_status(True)
            
 
     def cancel_key_down(self):
@@ -91,3 +99,6 @@ class ApplicationState:
             note.implement_unary_modifier(modifier)
         elif modifier[1] == 2:
             note.implement_binary_modifier(modifier)
+
+    def set_main_menu(self, menu:MainMenu):
+        self.main_menu = menu

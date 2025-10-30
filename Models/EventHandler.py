@@ -13,12 +13,12 @@ from Services.Utils import StaffUtils
 class EventHandler:
     """Handles all user input events."""
 
-    def __init__(self, state: ApplicationState, staff_renderer: StaffRenderer):
+    def __init__(self, state: ApplicationState):
         self.state = state
         self.logger = logging.getLogger(__name__)
-        self.screen_renderer = ScreenRenderer(state)
+        self.screen_renderer = state.screen_renderer
         self.sound_player = state.sound_player
-        self.staff_renderer = staff_renderer
+        self.staff_renderer = state.staff_renderer
 
     def handle_events(self) -> None:
         """Process all pygame events."""
@@ -53,6 +53,9 @@ class EventHandler:
             self.state.set_screen_refresh_status(True)
 
     def _handle_mouse_click(self, event) -> None:
+        #we want only mouse left button click
+        if event.button != 1:
+            return
         # check if there are modifiers, that will determine what to do with mouse click
         note_modifier = self.state.get_registered_note_modifier()
         click_position = Position(event.pos[0], event.pos[1])
@@ -61,7 +64,6 @@ class EventHandler:
         if note_modifier is not None and note_modifier[1] == 1:
             # check if there is any note near click and modify it           
             nearest_note = self.state.check_click_around_note(click_position)
-            print(f"nearest: {nearest_note}")
             if nearest_note is not None:
                 self.state.effect_note_modifier(nearest_note, note_modifier)
 
