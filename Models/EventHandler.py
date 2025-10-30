@@ -49,7 +49,8 @@ class EventHandler:
         # we don't want to show mouse tracker when unary key modifiers are down
         note_modifier = self.state.get_registered_note_modifier()
         if note_modifier is None or note_modifier[1] == 2:
-            self.state.mouse_hover.set_current_position(Position(event.pos[0], event.pos[1])) 
+            self.state.mouse_hover.set_current_position(Position(event.pos[0], event.pos[1]))
+            self.state.mouse_hover.notify()
             self.state.set_screen_refresh_status(True)
 
     def _handle_mouse_click(self, event) -> None:

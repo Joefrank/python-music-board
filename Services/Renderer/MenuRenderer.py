@@ -22,10 +22,11 @@ class MenuRenderer(BaseRenderer):
                           self.main_menu.width, self.main_menu.height))
         #render items here
         for item in self.main_menu.items:
+            dimension = item.dimensions
             pygame.draw.rect(self.screen, item.background_color, 
-                             (item.position.x, item.position.y, 
-                              self.main_menu.item_width, self.main_menu.item_height), border_radius=20)
+                             (dimension.left, dimension.top, dimension.width, 
+                              dimension.height), border_radius=10)
             
-            text_position = Position(item.position.x, item.position.y + 7)
+            text_position = Position(dimension.left, dimension.top + 7)
             self.draw_text(self.screen, item.text, text_position, MenuItemConfig.FONT_SIZE, 
-                           self.main_menu.item_width, font_color = Color.WHITE, text_alignment="CENTER")
+                           dimension.width, font_color = Color.WHITE, text_alignment="CENTER")

@@ -57,7 +57,8 @@ class MusicBoardApplication:
             .set_menu_position(Position(0,0)) \
                 .build_items(menu_items) \
                     .set_item_positions() \
-                        .build()
+                        .register_items_listeners(self.state) \
+                            .build()
         self.state.set_main_menu(main_menu)
 
         # init the first staff

@@ -27,14 +27,14 @@ class ApplicationState:
         self.screen_needs_refresh = False
         self.music_score = None
         self.error_messages = List[str]
-        self.last_note_added = None
-        self.mouse_click = MouseEvent(MouseEventType.CLICK)
-        self.mouse_hover = MouseEvent(MouseEventType.HOVER)
+        self.last_note_added = None        
         self.note_duration = None
         self.note_modifier = None
         self.main_menu = None
         self.screen_width = None
         self.screen_height = None
+        self.mouse_click = MouseEvent(MouseEventType.CLICK)
+        self.mouse_hover = MouseEvent(MouseEventType.HOVER)
 
     def set_renderers(self, staff_renderer, screen_renderer):
         self.staff_renderer = staff_renderer

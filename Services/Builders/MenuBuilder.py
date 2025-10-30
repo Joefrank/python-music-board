@@ -1,5 +1,8 @@
 from typing import List
+
+import pygame
 from Configs.screen_config import MenuItemConfig, MainMenuConfig
+from Models.DataModels.ApplicationState import ApplicationState
 from Models.Menu.MainMenu import MainMenu
 from Models.Menu.MenuItem import MenuItem
 from Models.Menu.MenuData import MenuData
@@ -34,9 +37,15 @@ class MenuBuilder:
         for item in self.main_menu.items:
             x = self.main_menu.position.x + padding_width + (count * (MenuItemConfig.WIDTH + margin))
             y = self.main_menu.position.y + ((MainMenuConfig.HEIGHT - MenuItemConfig.HEIGHT) // 2)
-            item.position = Position(x,y)
-            print(f"item pos:{item.position}")
+            item.set_dimensions(pygame.Rect(x,y, MenuItemConfig.WIDTH, MenuItemConfig.HEIGHT))
+            print(f"item pos:{item.dimensions.topleft}")
             count += 1 
+        return self
+
+    def register_items_listeners(self, state:ApplicationState):
+        for item in self.main_menu.items:
+            state.mouse_hover.listeners.append(item)
+            state.mouse_click.listeners.append(item)
         return self
 
     def build(self): 
