@@ -15,18 +15,25 @@ class MenuItem(MouseListener):
         self.hover_color = hover_color
         self.selected_color = selected_color
         self.position = None
-        self.dimensions:pygame.Rect = None         
+        self.dimensions:pygame.Rect = None   
+        self.active = False      
 
     def set_dimensions(self, dimensions: pygame.Rect):
         self.dimensions = dimensions
 
     def on_mouse_over(self, mouse_position) -> bool:
-        self.set_background_by_event(self.hover_color, mouse_position)
-
-    def on_mouse_left_click(self, mouse_position) -> bool:
-        self.set_background_by_event(self.selected_color, mouse_position)
-
-    def set_background_by_event(self, color: Color, mouse_position:Position):
-        self.background_color = color \
+        if self.active:
+            return        
+        self.background_color = self.hover_color \
             if self.dimensions.collidepoint(mouse_position.get_tuple()) \
             else self.unmutable_background
+        
+    def on_mouse_left_click(self, mouse_position) -> bool:
+        if self.dimensions.collidepoint(mouse_position.get_tuple()):
+            self.background_color = self.selected_color
+            self.click_action(self)
+            self.active = True
+        
+    def deactivate_item(self):
+        self.active = False
+        self.background_color = self.unmutable_background

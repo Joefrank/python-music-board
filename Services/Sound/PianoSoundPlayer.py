@@ -1,7 +1,7 @@
 import mido
 import time
-
 from Configs.music_config import NoteDurationInTicks
+from Models.MusicScore import MusicScore
 
 class SoundPlayer:
     keys_played = []
@@ -50,4 +50,7 @@ class SoundPlayer:
         for v in range(len(cresendo_steps)):  # 40, 60, 80, 100
             self.play_note(note_key_code, duration_ticks, velocity=v)
 
+    def play_whole_score(self, state, from_step:int = 0):
+        print(f"Playing score from step:{from_step}")
+        
     

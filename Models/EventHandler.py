@@ -49,17 +49,19 @@ class EventHandler:
         # we don't want to show mouse tracker when unary key modifiers are down
         note_modifier = self.state.get_registered_note_modifier()
         if note_modifier is None or note_modifier[1] == 2:
-            self.state.mouse_hover.set_current_position(Position(event.pos[0], event.pos[1]))
-            self.state.mouse_hover.notify()
+            mouse_position = Position(event.pos[0], event.pos[1])
+            self.state.register_mouse_over_event(mouse_position)
             self.state.set_screen_refresh_status(True)
 
     def _handle_mouse_click(self, event) -> None:
         #we want only mouse left button click
         if event.button != 1:
             return
+        
         # check if there are modifiers, that will determine what to do with mouse click
         note_modifier = self.state.get_registered_note_modifier()
         click_position = Position(event.pos[0], event.pos[1])
+        self.state.register_mouse_click_event(click_position)
         nearest_note = None
         # if any modifier (key down) has been registered before click. unary modifier only in this case
         if note_modifier is not None and note_modifier[1] == 1:

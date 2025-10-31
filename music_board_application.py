@@ -7,6 +7,7 @@ from Models import MusicScore
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.EventHandler import EventHandler
 from Models.Menu.MenuData import MenuData
+from Models.Menu.MenuItem import MenuItem
 from Models.Position import Position
 from Models.exceptions import MusicBoardApplicationError
 from Services.Builders import MenuBuilder, MusicScoreBuilderDirector, StaffBuilderDirector
@@ -121,14 +122,21 @@ class MusicBoardApplication:
                                                                     time_signature, key_signature)
         return grand_staff
     
-    def menu_reset_action(self):
-        print('resetting all')
+    def menu_reset_action(self, menu_item:MenuItem):
+        # check that there are no active menu otherwise alert.
+        print('resetting all user actions')
+        self.state.reset_all_actions(menu_item)
 
-    def menu_play_notes(self):
+    def menu_play_notes(self, menu_item:MenuItem):
+        # check that there are no active menu otherwise alert.
         print('playing all notes on score')
+        self.state.sound_player.play_whole_score(self.music_score, 0)
+        menu_item.deactivate_item()
 
-    def menu_save_score(self):
+    def menu_save_score(self, menu_item:MenuItem):
+        # check that there are no active menu otherwise alert.
         print('saving score')
+        menu_item.deactivate_item()
    
         
     

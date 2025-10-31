@@ -1,5 +1,6 @@
 """Application state management."""
 
+import copy
 from dataclasses import dataclass, field
 from typing import Optional, List, Tuple
 from pygame import Surface
@@ -8,6 +9,7 @@ from Configs.music_config import valid_note_durations, note_modifiers
 from Models import MusicScore, Note
 from Models.GrandStaff import GrandStaff
 from Models.Menu import MainMenu
+from Models.Menu.MenuItem import MenuItem
 from Models.MouseEvent import MouseEvent
 from Models.Position import Position
 from Models.Staff import Staff
@@ -26,6 +28,7 @@ class ApplicationState:
         self.is_running: bool = True
         self.screen_needs_refresh = False
         self.music_score = None
+        self.music_score_backup = None #used to reset score
         self.error_messages = List[str]
         self.last_note_added = None        
         self.note_duration = None
@@ -48,6 +51,7 @@ class ApplicationState:
 
     def set_music_score(self, score: MusicScore):
         self.music_score = score
+        self.music_score_backup = copy.deepcopy(score)
 
     def set_last_added_note(self, note: Note):
         self.last_note_added = note
@@ -102,3 +106,16 @@ class ApplicationState:
 
     def set_main_menu(self, menu:MainMenu):
         self.main_menu = menu
+
+    def register_mouse_over_event(self, new_mouse_position):
+        self.mouse_hover.set_current_position(new_mouse_position)
+        self.mouse_hover.notify()
+
+    def register_mouse_click_event(self, new_mouse_position):
+        self.mouse_click.set_current_position(new_mouse_position)
+        self.mouse_click.notify()
+            
+    def reset_all_actions(self, source_menu_item:MenuItem):
+        self.music_score = copy.deepcopy(self.music_score_backup) 
+        if source_menu_item is not None:
+            source_menu_item.deactivate_item()
