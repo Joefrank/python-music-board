@@ -30,18 +30,18 @@ class StaffRenderer(BaseRenderer):
         for staff in grand_staff.staves:
             self.render_staff(staff, screen)
             if previous_staff is not None:
-                self.bind_staves(previous_staff, staff, screen)
+                self.bind_staves(previous_staff, staff)
             previous_staff = staff
 
-    def bind_staves(self, top_staff, bottom_staff, screen):
-        self.draw_line_from_point(top_staff.top_position, bottom_staff.top_position, screen, thickness=2)
+    def bind_staves(self, top_staff, bottom_staff):
+        self.draw_line_from_point(top_staff.top_position, bottom_staff.top_position, thickness=2)
 
     """ Displays a single staff on our music score."""
     def render_staff(self, staff, screen): 
-        self.draw_staff_boundaries(staff, screen)        
-        clef_position = self.draw_staff_clef(screen, staff)
+        self.draw_staff_boundaries(staff)        
+        clef_position = self.draw_staff_clef(staff)
         key_signature_position = Position(clef_position.x + 20, clef_position.y)
-        last_offset_x = self.draw_key_signature(staff, screen, key_signature_position)
+        last_offset_x = self.draw_key_signature(staff, key_signature_position)
         last_offset_x += 30
         _, _, end_offset = self.draw_time_signature(screen, staff.time_signature, Position(last_offset_x, staff.top_position.y))  
         # Collaterals are every music symbols to be drawn on or around the staff. 
@@ -67,7 +67,7 @@ class StaffRenderer(BaseRenderer):
     """ Display all staff lines (virtual and non-virtual) and contained elements on screen."""
     def render_staff_lines(self, staff):
         for line in staff.lines:
-            self.draw_line(line, self.screen)            
+            self.draw_line(line)            
             self.draw_staff_item_collaterals(line)
            
         for line in staff.virtual_lines:
@@ -182,9 +182,9 @@ class StaffRenderer(BaseRenderer):
          staff_item.add_note(new_note)  
          return new_note    
     
-    def draw_staff_boundaries(self, staff, screen):
-        self.draw_line_from_point(staff.position_rect.top_left, staff.position_rect.bottom_left, screen, thickness=2)
-        self.draw_line_from_point(staff.position_rect.top_right, staff.position_rect.bottom_right, screen, thickness=2)
+    def draw_staff_boundaries(self, staff):
+        self.draw_line_from_point(staff.position_rect.top_left, staff.position_rect.bottom_left, thickness=2)
+        self.draw_line_from_point(staff.position_rect.top_right, staff.position_rect.bottom_right, thickness=2)
 
     """
         Draws a virtual line at the top or bottom of the staff
@@ -200,7 +200,7 @@ class StaffRenderer(BaseRenderer):
     """
         Draws the clef on the staff.
     """
-    def draw_staff_clef(self, screen, staff, font_color=(0, 0, 0)):
+    def draw_staff_clef(self, staff, font_color=(0, 0, 0)):
         clef_settings = supported_clef_settings[staff.clef]
         clef_size = clef_settings["size"]
         clef_font_size = pygame.font.Font(GenericConfig.BRAVURA_FONT_PATH, clef_size)
@@ -209,7 +209,7 @@ class StaffRenderer(BaseRenderer):
         clef_rect = clef.get_rect()
         clef_position = StaffUtils.resolve_position_with_margins(staff.position_rect.top_left, clef_settings["margins"])
         clef_rect.center = (clef_position.x, clef_position.y)
-        screen.blit(clef, clef_rect)
+        self.screen.blit(clef, clef_rect)
         return clef_position
     
     """
@@ -235,7 +235,7 @@ class StaffRenderer(BaseRenderer):
     """
         Draws the key signature of the staff
     """
-    def draw_key_signature(self, staff, screen, reference_position):
+    def draw_key_signature(self, staff, reference_position):
         clef_settings = supported_clef_settings[staff.clef]
         signature_patterns =clef_settings["signature_position_pattern"]
         signature_details = signature_patterns[staff.key_signature]
@@ -260,7 +260,7 @@ class StaffRenderer(BaseRenderer):
                                                                                    staff.intervals, signature_item_positioning[1], self.MODULATION_SPACING, reference_position.x)
 
             signature_position = (staff_item_position.x, staff_item_position.y)
-            self.draw_modulation(screen, modulation_font_code, staff_generic_settings["MODULATION_FONT_SIZE"],
+            self.draw_modulation(self.screen, modulation_font_code, staff_generic_settings["MODULATION_FONT_SIZE"],
                                  signature_position)
             modulation_item_index += 1
             last_modulation_x_offset = staff_item_position.x

@@ -49,12 +49,12 @@ class BaseRenderer:
         else:
             screen.blit(text_renderer, (position.x, position.y))  # White color text
 
-    def draw_line_from_point(self, start_point, end_point, screen, color=(0, 0, 0), thickness=1):
-        pygame.draw.line(screen, color, (start_point.x, start_point.y),
+    def draw_line_from_point(self, start_point, end_point, color=(0, 0, 0), thickness=1):
+        pygame.draw.line(self.screen, color, (start_point.x, start_point.y),
                          (end_point.x, end_point.y), thickness)
         
-    def draw_line(self, line, screen, color=(0, 0, 0), thickness=1):
-        self.draw_line_from_point(line.start_position, line.end_position, screen, color, thickness) 
+    def draw_line(self, line, color=(0, 0, 0), thickness=1):
+        self.draw_line_from_point(line.start_position, line.end_position, color, thickness) 
 
     """ 
         note_type: duration of note (1: note, 2: semi-brev , 4:quaver), 

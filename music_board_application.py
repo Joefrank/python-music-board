@@ -11,6 +11,7 @@ from Models.Menu.MenuItem import MenuItem
 from Models.Position import Position
 from Models.exceptions import MusicBoardApplicationError
 from Services.Builders import MenuBuilder, MusicScoreBuilderDirector, StaffBuilderDirector
+from Services.Renderer.ScoreNavigator import ScoreNavigator
 from Services.Renderer.StaffRenderer import StaffRenderer
 from Services.Renderer.ScreenRenderer import ScreenRenderer
 from Configs.screen_config import StaffConfig
@@ -31,6 +32,7 @@ class MusicBoardApplication:
         self.score_builder_director = MusicScoreBuilderDirector.MusicScoreBuilderDirector()
         self.music_score = None
         self.menu_builder = MenuBuilder.MenuBuilder()
+        self.state.set_score_navigator(ScoreNavigator())
 
     def initialize(self) -> None:
         """ Initializes everything to do with music-board application """
@@ -91,7 +93,7 @@ class MusicBoardApplication:
             #clock.tick(3160)
             #pygame.display.flip()
             #self.staff_renderer.render_music_score(self.main_canvas, self.music_score)
-            pygame.time.wait(200)
+            pygame.time.wait(10)
 
         #except KeyboardInterrupt:
             #self.logger.info("Application interrupted by user")
@@ -130,8 +132,9 @@ class MusicBoardApplication:
     def menu_play_notes(self, menu_item:MenuItem):
         # check that there are no active menu otherwise alert.
         print('playing all notes on score')
-        self.state.sound_player.play_whole_score(self.music_score, 0)
-        menu_item.deactivate_item()
+        self.state.score_navigator.activate(self.music_score)
+        #self.state.sound_player.play_whole_score(self.music_score, 0)
+        #menu_item.deactivate_item()
 
     def menu_save_score(self, menu_item:MenuItem):
         # check that there are no active menu otherwise alert.

@@ -38,6 +38,7 @@ class ApplicationState:
         self.screen_height = None
         self.mouse_click = MouseEvent(MouseEventType.CLICK)
         self.mouse_hover = MouseEvent(MouseEventType.HOVER)
+        self.score_navigator = None
 
     def set_renderers(self, staff_renderer, screen_renderer):
         self.staff_renderer = staff_renderer
@@ -52,6 +53,9 @@ class ApplicationState:
     def set_music_score(self, score: MusicScore):
         self.music_score = score
         self.music_score_backup = copy.deepcopy(score)
+
+    def set_score_navigator(self, score_navigator):
+        self.score_navigator = score_navigator
 
     def set_last_added_note(self, note: Note):
         self.last_note_added = note

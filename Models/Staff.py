@@ -52,6 +52,15 @@ class Staff:
                 return note
         return None
     
+    def get_top_left(self):
+        return self.top_position
+
+    def get_bottom_left(self):
+        return self.bottom_position
+    
+    def get_initial_navigator_line(self):
+        return (self.get_top_left(), self.get_bottom_left())
+    
     def __str__(self):
         lines_str = "-> ".join(str(line) for line in self.lines)
         intervals_str = "-> ".join(str(interval) for interval in self.intervals)

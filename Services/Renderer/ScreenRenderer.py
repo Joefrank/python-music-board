@@ -10,7 +10,7 @@ from Services.Renderer.MusicScoreRenderer import MusicScoreRenderer
 
 class ScreenRenderer(BaseRenderer):  
 
-    def __init__(self, state):
+    def __init__(self, state:ApplicationState):
         super().__init__(state)
         self.main_canvas = None
         self.logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ class ScreenRenderer(BaseRenderer):
     def render_frame(self) -> None:
         """Render a complete frame."""
        # try:
-        if self.state.screen_needs_refresh:
+        if self.state.screen_needs_refresh or self.state.score_navigator.is_active():
             self._clear_screen(self.state.main_canvass)
             self.menu_renderer.render_menu()
             self.score_renderer.render_score(self.state.main_canvass, self.state.music_score)               
