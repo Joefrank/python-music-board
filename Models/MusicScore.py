@@ -23,6 +23,12 @@ class MusicScore:
     def set_score_width(self, score_width):
         self.score_width = score_width
 
+    def get_all_notes_in_positional_order(self):
+        notes = []
+        for staff in self.staves_sequence:
+            notes.extend(staff.get_notes())
+        return sorted(notes, key=lambda note: note.position.x)
+    
     #def get_lowest_y_credit(self):
         # credits: list of ScoreCredit
         #if not self.credits:

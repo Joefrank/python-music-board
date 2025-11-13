@@ -37,6 +37,12 @@ class GrandStaff:
         if no_of_staves > 0:
             return self.staves[no_of_staves - 1].get_bottom_left()
         
+    def get_notes(self):
+        notes = []
+        for staff in self.staves:
+            notes.extend(staff.get_notes())
+        return notes
+    
     def get_initial_navigator_line(self):
         top_left = copy.deepcopy(self.get_top_left())
         bottom_left = copy.deepcopy(self.get_bottom_left())

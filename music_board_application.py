@@ -6,15 +6,18 @@ from Configs.music_config import BASS_CLEF, TREBLE_CLEF
 from Models import MusicScore
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.EventHandler import EventHandler
+from Models.Menu.MenuColorConfig import MenuColorConfig
 from Models.Menu.MenuData import MenuData
 from Models.Menu.MenuItem import MenuItem
+from Models.Menu.MenuItemState import MenuItemState
+from Models.Menu.MenuItemStateStep import MenuItemStateStep
 from Models.Position import Position
 from Models.exceptions import MusicBoardApplicationError
 from Services.Builders import MenuBuilder, MusicScoreBuilderDirector, StaffBuilderDirector
 from Services.Renderer.ScoreNavigator import ScoreNavigator
 from Services.Renderer.StaffRenderer import StaffRenderer
 from Services.Renderer.ScreenRenderer import ScreenRenderer
-from Configs.screen_config import StaffConfig
+from Configs.screen_config import Color, StaffConfig
 from Services.Sound.PianoSoundPlayer import SoundPlayer
 
 class MusicBoardApplication:
@@ -32,7 +35,7 @@ class MusicBoardApplication:
         self.score_builder_director = MusicScoreBuilderDirector.MusicScoreBuilderDirector()
         self.music_score = None
         self.menu_builder = MenuBuilder.MenuBuilder()
-        self.state.set_score_navigator(ScoreNavigator())
+        self.state.set_score_navigator(ScoreNavigator(self.state))
 
     def initialize(self) -> None:
         """ Initializes everything to do with music-board application """
@@ -53,12 +56,48 @@ class MusicBoardApplication:
         self.state.set_main_screen(self.main_canvas)
         
         # init the main menu
-        menu_items = [MenuData("Reset", "Click to reset everything.", self.menu_reset_action),
-                      MenuData("Play", "Click to play the score.", self.menu_play_notes),
-                      MenuData("Save", "Click to save the score.", self.menu_save_score)]
+        gt_start_state = MenuItemState()
+        gt_end_state = MenuItemState()
+        pause_play_state = MenuItemState()
+        reset_menu_item_state = MenuItemState()
+        play_menu_item_state= MenuItemState()
+        save_menu_item_state = MenuItemState()
+        # items for play sub-menu
+        gt_start_state.add_step(MenuItemStateStep("GoToStartNV", "<<", "Go to start", None, Color.WHITE, Color.BLACK, self.menu_reset_score_navigator, self.menu_show_tooltip))
+        pause_step = MenuItemStateStep("PauseNV", "||", "Pause player", None, Color.WHITE, Color.BLACK, self.menu_pause_score_navigator, self.menu_show_tooltip)
+        continue_step = MenuItemStateStep("ContinueNV", ">", "Continue playing", pause_step, Color.WHITE, Color.BLACK, self.menu_continue_score_navigator, self.menu_show_tooltip)
+        pause_step.set_next_step(continue_step)
+        pause_play_state.add_step(pause_step)
+        pause_play_state.add_step(continue_step)
+        gt_end_state.add_step(MenuItemStateStep("GoToEndNV", ">>", "Go to end", None, Color.WHITE, Color.BLACK, self.menu_score_navigator_end, self.menu_show_tooltip))
+        # items for main menu
+        reset_menu_step = MenuItemStateStep("ResetMM", "Reset", "Click to reset everything.", None, Color.BLUE, Color.WHITE, self.menu_reset_action, self.menu_show_tooltip)
+        play_menu_step1 = MenuItemStateStep("PlayMM","Play", "Click to play the score.", None, Color.BLUE, Color.WHITE, self.menu_play_notes, self.menu_show_tooltip)
+        play_menu_step2 = MenuItemStateStep("StopMM","Stop", "Click to stop playing the score.", play_menu_step1, Color.RED, Color.WHITE, self.menu_cancel_score, self.menu_show_tooltip)
+        play_menu_step3 = MenuItemStateStep("HoverMM","Play", "Click to stop playing the score.", play_menu_step2, Color.PINK, Color.WHITE, self.menu_play_notes, self.menu_show_tooltip)
+        
+        play_menu_step1.set_next_step(play_menu_step2)
+        save_menu_step = MenuItemStateStep("SaveMM", "Save", "Click to save the score.", None, Color.BLUE, Color.WHITE, self.menu_save_score, self.menu_show_tooltip)
+        
+        reset_menu_item_state.add_step(reset_menu_step)
+        play_menu_item_state.add_step(play_menu_step1)
+        play_menu_item_state.add_step(play_menu_step2)
+        play_menu_item_state.add_step(play_menu_step3)
+        save_menu_item_state.add_step(save_menu_step)
+
+        main_menu_color_config = MenuColorConfig(Color.BLUE, Color.PINK, Color.RED, Color.WHITE)
+        sub_menu_color_config = MenuColorConfig(Color.WHITE, Color.LIGHT_GRAY, Color.GREY, Color.WHITE)
+
+        play_submenu_data = [MenuData(gt_start_state, sub_menu_color_config), 
+                             MenuData(pause_play_state, sub_menu_color_config), 
+                             MenuData(gt_end_state, sub_menu_color_config)]
+        main_menu_data = [MenuData(reset_menu_item_state, main_menu_color_config), 
+                          MenuData(play_menu_item_state, main_menu_color_config, play_submenu_data),
+                      MenuData(save_menu_item_state, main_menu_color_config)]
+        
         main_menu = self.menu_builder \
             .set_menu_position(Position(0,0)) \
-                .build_items(menu_items) \
+                .build_items(main_menu_data) \
                     .set_item_positions() \
                         .register_items_listeners(self.state) \
                             .build()
@@ -129,19 +168,40 @@ class MusicBoardApplication:
         print('resetting all user actions')
         self.state.reset_all_actions(menu_item)
 
-    def menu_play_notes(self, menu_item:MenuItem):
-        # check that there are no active menu otherwise alert.
-        print('playing all notes on score')
-        self.state.score_navigator.activate(self.music_score)
-        #self.state.sound_player.play_whole_score(self.music_score, 0)
-        #menu_item.deactivate_item()
+    
 
     def menu_save_score(self, menu_item:MenuItem):
         # check that there are no active menu otherwise alert.
         print('saving score')
         menu_item.deactivate_item()
    
-        
+    def menu_show_tooltip(self, menu_item:MenuItem):
+        # show tooltip on status bar
+        print(f"Tooltip: {menu_item.get_current_step().tooltip}")
     
         
+    def menu_reset_score_navigator(self, menu_item:MenuItem):
+        pass
+
+    def menu_pause_score_navigator(self, menu_item:MenuItem):
+        pass
+
+    def menu_continue_score_navigator(self, menu_item:MenuItem):
+        pass
+
+    def menu_score_navigator_end(self, menu_item:MenuItem):
+        pass
+
+    """ Play all notes on the score from beginning to end. """
+    def menu_play_notes(self, menu_item:MenuItem): 
+        menu_item.set_active()  
+        menu_item.go_to_step_by_id("StopMM")      
+        self.state.score_navigator.activate(self.music_score)  
+        
+
+    """ Cancel/stop playing score """
+    def menu_cancel_score(self, menu_item:MenuItem):  
+        menu_item.deactivate_item()
+        menu_item.go_to_step_by_id("PlayMM")      
+        self.state.score_navigator.cancel(menu_item)
         

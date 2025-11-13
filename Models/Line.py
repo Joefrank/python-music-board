@@ -45,5 +45,11 @@ class Line(StraightLine):
                 return note        
         return None
     
+    def get_notes(self):
+        return self.notes
+    
+    def get_notes_in_positional_order(self):
+        return sorted(self.notes, key=lambda note: note.position.x)
+    
     def __str__(self):
         return f"\n{"Virtual " if self.is_virtual else ""}Line #{self.staff_index} - Thickness: {self.thickness} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Start: {self.start_position} - End: {self.end_position}"

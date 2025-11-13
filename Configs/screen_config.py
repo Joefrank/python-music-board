@@ -1,12 +1,18 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Tuple
 
+class ScoreNavigatorStatus(Enum):
+    INVACTIVE = 1,
+    RUNNING = 2,
+    PAUSE = 3
 
 @dataclass
 class Color:
     BLACK = (25,25,25)
     RED = (255,0,0)
     GREY = (100,100,100)
+    LIGHT_GRAY = (150,150,150)
     BLUE = (25, 25, 255)
     SKYBLUE = (144,212,255)
     WHITE = (255,255,255)
@@ -31,6 +37,12 @@ class WindowConfig:
 class MainMenuConfig:
     BACKGROUND_COLOR = Color.SKYBLUE
     WIDTH = WindowConfig.WIDTH
+    HEIGHT = 50
+    PADDING = 10
+
+@dataclass
+class SubMenuConfig:
+    BACKGROUND_COLOR = Color.WHITE
     HEIGHT = 50
     
 @dataclass

@@ -48,6 +48,9 @@ class Interval:
                 return note        
         return None
     
+    def get_notes(self):
+        return self.notes
+    
     def __str__(self):
         return (f"\n{"Virtual " if self.is_virtual else ""}Interval #{self.staff_index} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Top-Left{self.position_rect.top_left} - Top-Right: {self.position_rect} "
                 f"- Bottom-Left: {self.position_rect.bottom_left} - Bottom-Right: {self.position_rect.bottom_right}"
