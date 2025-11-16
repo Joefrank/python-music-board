@@ -1,9 +1,9 @@
 from Configs.screen_config import MouseEventType
-from Models.Events.Notifier import Notifier
+from Models.Events.Event import Event
 from Models.Position import Position
 
 
-class MouseEvent(Notifier):
+class MouseEvent(Event):
 
     def __init__(self, event_type: MouseEventType):
         super().__init__()

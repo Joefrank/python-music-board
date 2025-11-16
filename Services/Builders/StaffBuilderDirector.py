@@ -79,7 +79,7 @@ class StaffBuilderDirector:
                                                VERTICAL_POSITION_BOTTOM, possible_staff_padding, possible_no_oftop_lines_and_intervals
                                                , staff_left_x_offset, StaffConfig.STAFF_RIGHT_PADDING)
         current_staff = self.staff_builder.build_staff()
-        self.staff_builder.set_position() 
+        current_staff.set_notes_boundaries() 
         return current_staff
     
     def build_grand_staff(self, window_width, StaffConfig, clef_tuple, time_signature, key_signature):

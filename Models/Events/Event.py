@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from Models.Position import Position
 
-class Notifier:
+class Event:
     def __init__(self):
         self.listeners = []
 

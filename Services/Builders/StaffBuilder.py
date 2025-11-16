@@ -170,7 +170,7 @@ class StaffBuilder:
         self.staff.virtual_lines = [line for line in self.lines if line.is_virtual]
         self.staff.intervals = [interval for interval in self.intervals if not interval.is_virtual]   
         self.staff.virtual_intervals = [interval for interval in self.intervals if interval.is_virtual]
-        #self.set_position(self.staff)
+        self.set_position()
         return self.staff
     
 
@@ -185,7 +185,7 @@ class StaffBuilder:
         self.staff.position_rect = Rect(self.staff.top_line.start_position,  self.staff.top_line.end_position,
                                         self.staff.bottom_line.end_position, self.staff.bottom_line.start_position)
         self.staff.top_position = self.staff.top_line.start_position
-        self.staff.bottom_position = self.staff.bottom_line.start_position
+        self.staff.bottom_position = self.staff.bottom_line.start_position        
 
     """
         Works out left offset on staff/lines where we can start displaying notes and other musical signs.

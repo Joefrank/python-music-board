@@ -7,10 +7,11 @@ from pygame import Surface
 from Configs.screen_config import MouseEventType
 from Configs.music_config import valid_note_durations, note_modifiers
 from Models import MusicScore, Note
+from Models.Events.ScreenUpdateEvent import ScreenUpdateEvent
 from Models.GrandStaff import GrandStaff
 from Models.Menu import MainMenu
 from Models.Menu.MenuItem import MenuItem
-from Models.MouseEvent import MouseEvent
+from Models.Events.MouseEvent import MouseEvent
 from Models.Position import Position
 from Models.Staff import Staff
 from Services.Sound.PianoSoundPlayer import SoundPlayer
@@ -39,7 +40,20 @@ class ApplicationState:
         self.mouse_click = MouseEvent(MouseEventType.CLICK)
         self.mouse_hover = MouseEvent(MouseEventType.HOVER)
         self.score_navigator = None
+        self.events_queue = []
 
+    def raise_screen_update_event(self):
+        update_event = ScreenUpdateEvent(2)
+        self.events_queue.append(update_event)
+
+    def screen_update_needed(self) -> bool:
+        self.screen_needs_refresh = True
+    
+    def get_next_event(self):
+        if len(self.events_queue) == 0:
+            return None
+        return self.events_queue.pop(0)
+    
     def set_renderers(self, staff_renderer, screen_renderer):
         self.staff_renderer = staff_renderer
         self.screen_renderer = screen_renderer

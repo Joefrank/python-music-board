@@ -43,8 +43,14 @@ class GrandStaff:
             notes.extend(staff.get_notes())
         return notes
     
+    def get_notes_offsets(self):
+        if len(self.staves) > 0:
+            return self.staves[0].get_notes_offsets()
+    
     def get_initial_navigator_line(self):
-        top_left = copy.deepcopy(self.get_top_left())
-        bottom_left = copy.deepcopy(self.get_bottom_left())
+        top_staff_top, _ = self.staves[0].get_initial_navigator_line()
+        _, bottom_staff_bottom = self.staves[-1].get_initial_navigator_line() 
+        top_left = copy.deepcopy(top_staff_top)
+        bottom_left = copy.deepcopy(bottom_staff_bottom)
         return (top_left, bottom_left)
     

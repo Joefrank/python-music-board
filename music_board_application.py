@@ -196,7 +196,7 @@ class MusicBoardApplication:
     def menu_play_notes(self, menu_item:MenuItem): 
         menu_item.set_active()  
         menu_item.go_to_step_by_id("StopMM")      
-        self.state.score_navigator.activate(self.music_score)  
+        self.state.score_navigator.activate(self.music_score, menu_item)  
         
 
     """ Cancel/stop playing score """

@@ -18,22 +18,29 @@ class ScoreNavigator:
         self.end_position:Position = None
         self.music_score:MusicScore = None
         self.current_line:StraightLine = None
+        self.current_staff = None
+        self.current_staff_index:int = 0
         self.state = ScoreNavigatorStatus.INVACTIVE
+        self.app_state = app_state
         self.sound_player = app_state.sound_player
+        self.menu_item:MenuItem = None
         self.notes_to_play = []
 
-    def activate(self, music_score):       
+    def activate(self, music_score, menu_item:MenuItem):       
        self.music_score = music_score       
-       self.start_position, self.end_position = self.music_score.staves_sequence[0].get_initial_navigator_line()
+       self.current_staff = self.music_score.staves_sequence[self.current_staff_index];
+       self.start_position, self.end_position = self.current_staff.get_initial_navigator_line()
        self.current_line = StraightLine(self.start_position, self.end_position, thickness=2)
        self.state = ScoreNavigatorStatus.RUNNING 
+       self.menu_item = menu_item
        self.notes_to_play =  music_score.get_all_notes_in_positional_order()     
 
     def cancel(self, menu_item:MenuItem):   
        self.start_position, self.end_position = None, None
        self.current_line = None
        self.state = ScoreNavigatorStatus.INVACTIVE
-       menu_item.deactivate_item()
+       menu_item.deactivate_item()   
+       self.app_state.set_screen_refresh_status(True)    
 
     def is_paused(self):
         return self.state == ScoreNavigatorStatus.PAUSE
@@ -47,7 +54,20 @@ class ScoreNavigator:
     def deactivate(self):
         self.state = ScoreNavigatorStatus.INVACTIVE
 
-    def move_next(self):
+    def move_next(self) -> bool:
+        #check that we haven't reached current staff note_right_offset
+        if self.current_line.start_position.x >= self.current_staff.get_notes_offsets()[1]:
+            # if there is no staff after this one
+            if (self.current_staff_index + 1) >= len(self.music_score.staves_sequence):
+                #otherwise stop: cancel navigation
+                self.cancel(self.menu_item)
+                return False
+            else:
+                self.current_staff_index += 1
+                self.current_staff = self.music_score.staves_sequence[self.current_staff_index]
+                self.start_position, self.end_position = self.current_staff.get_initial_navigator_line()
+                self.current_line = StraightLine(self.start_position, self.end_position, thickness=2)
+        
         self.current_line.translateTo(1,0)
         self.play_score_at_position(self.current_line.start_position)
 

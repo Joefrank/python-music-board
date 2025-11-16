@@ -1,3 +1,4 @@
+from Models.Position import Position
 class Staff: 
    
     
@@ -29,11 +30,11 @@ class Staff:
         self.time_signature = time_signature
         self.key_signature = key_signature
       
-    def set_notes_boundaries(self, left, top, right, bottom):
-        self.notes_left_offset = left
-        self.notes_right_offset = right
-        self.notes_top_offset = top
-        self.notes_bottom_offset = bottom
+    def set_notes_boundaries(self):
+        self.notes_left_offset = self.top_line.line_collateral_boundaries.left_boundary
+        self.notes_right_offset = self.top_line.line_collateral_boundaries.right_boundary
+        self.notes_top_offset = self.top_line.start_position.y
+        self.notes_bottom_offset = self.bottom_line.start_position.y
 
     def get_width(self):
         return self.top_line.end_position.x - self.top_line.start_position.x
@@ -58,14 +59,23 @@ class Staff:
     def get_bottom_left(self):
         return self.bottom_position
     
+    def get_notes_offsets(self):
+        return (self.notes_left_offset, self.notes_right_offset)
+    
     def get_initial_navigator_line(self):
-        return (self.get_top_left(), self.get_bottom_left())
+        navigator_top_left = Position(self.notes_left_offset, self.top_position.y)
+        navigator_bottom_left = Position(self.notes_left_offset, self.bottom_position.y)
+        return (navigator_top_left, navigator_bottom_left)
     
     def get_notes(self):
         notes = []
         for line in self.lines:
             notes.extend(line.get_notes())
+        for line in self.virtual_lines:
+            notes.extend(line.get_notes())
         for interval in self.intervals:
+            notes.extend(interval.get_notes())
+        for interval in self.virtual_intervals:
             notes.extend(interval.get_notes())
         return notes
     
