@@ -4,6 +4,7 @@ import pygame
 import logging
 from Models import Note
 from Models.DataModels.ApplicationState import ApplicationState
+from Models.Events.Event import Event
 from Models.Position import Position
 from Services.Renderer.ScreenRenderer import ScreenRenderer
 from Services.Renderer.StaffRenderer import StaffRenderer
@@ -39,6 +40,11 @@ class EventHandler:
             except Exception as e:
                 self.logger.error(f"Error handling event {event.type}: {e}")
                 #self.state.add_error(f"Event handling error: {e}")
+        #check events in state
+        next_event:Event = self.state.get_next_event()
+        if next_event is not None:
+            next_event.notify()
+      
 
     def _handle_quit(self) -> None:
         """Handle application quit event."""

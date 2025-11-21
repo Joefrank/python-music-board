@@ -1,3 +1,5 @@
+import queue
+import threading
 import mido
 import time
 from Configs.music_config import NoteDurationInTicks
@@ -14,6 +16,7 @@ class SoundPlayer:
     
     def __init__(self):
         self.outport = mido.open_output()
+        self.note_queue = queue.Queue()
 
     def play_key(self, key_code):
         self.keys_played.append(key_code)
@@ -28,9 +31,13 @@ class SoundPlayer:
         velocity: Controls loudness / brightness (0 - 127)
     """
     def play_note(self, note_key_code, duration_ticks, velocity=64):
-        self.outport.send(mido.Message('note_on', note=note_key_code, velocity=velocity))
-        time.sleep(duration_ticks * self.SECONDS_PER_TICK)
-        self.outport.send(mido.Message('note_off', note=note_key_code, velocity=velocity))
+        try:
+            self.outport.send(mido.Message('note_on', note=note_key_code, velocity=velocity))
+            time.sleep(duration_ticks * self.SECONDS_PER_TICK)
+            self.outport.send(mido.Message('note_off', note=note_key_code, velocity=velocity))
+        except IOError:
+            print("Could not open MIDI output. Available ports:")
+            print(mido.get_output_names())
 
     """
         Plays piano note with a delay to match timing/duration
@@ -51,6 +58,30 @@ class SoundPlayer:
     def play_note_crescendo(self, note_key_code, duration_ticks, cresendo_steps):
         for v in range(len(cresendo_steps)):  # 40, 60, 80, 100
             self.play_note(note_key_code, duration_ticks, velocity=v)
+
+    def midi_worker(self, port_name='Microsoft GS Wavetable Synth'):
+        # try:
+        #     outport = mido.open_output(port_name)
+        # except IOError:
+        #     print("Could not open MIDI output. Available ports:")
+        #     print(mido.get_output_names())
+        #     return
+
+        while True:
+            note, length = self.note_queue.get()   # blocks until a note is available
+            print(f"processing note: {note} - duration:{length}")
+            # Play note
+            self.outport.send(mido.Message('note_on', note=note, velocity=90))
+            time.sleep(length)
+            self.outport.send(mido.Message('note_off', note=note))
+            self.note_queue.task_done()
+
+    def start_processing_queue(self):
+        # Start MIDI thread
+        threading.Thread(target=self.midi_worker, daemon=True).start()
+
+    def add_note_to_queue(self, note, length):
+        self.note_queue.put((note, length))
 
         
     

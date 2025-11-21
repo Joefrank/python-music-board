@@ -26,8 +26,8 @@ class ScreenRenderer(BaseRenderer):
 
     def render_frame(self) -> None:
         """Render a complete frame."""
-       # try:
-        if self.state.screen_needs_refresh or self.state.score_navigator.is_running():
+       # try:        
+        if (self.state.screen_needs_refresh or self.state.score_navigator.is_running()):
             self._clear_screen(self.state.main_canvass)
             self.menu_renderer.render_menu()
             self.score_renderer.render_score(self.state.main_canvass, self.state.music_score)               

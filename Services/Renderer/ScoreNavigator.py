@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import queue
 from Configs.screen_config import Color, ScoreNavigatorStatus
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.GrandStaff import GrandStaff
@@ -25,7 +26,7 @@ class ScoreNavigator:
         self.sound_player = app_state.sound_player
         self.menu_item:MenuItem = None
         self.notes_to_play = []
-
+        
     def activate(self, music_score, menu_item:MenuItem):       
        self.music_score = music_score       
        self.current_staff = self.music_score.staves_sequence[self.current_staff_index];
@@ -33,14 +34,15 @@ class ScoreNavigator:
        self.current_line = StraightLine(self.start_position, self.end_position, thickness=2)
        self.state = ScoreNavigatorStatus.RUNNING 
        self.menu_item = menu_item
-       self.notes_to_play =  music_score.get_all_notes_in_positional_order()     
+       self.notes_to_play =  music_score.get_all_notes_in_positional_order()    
+       self.sound_player.start_processing_queue() 
 
     def cancel(self, menu_item:MenuItem):   
        self.start_position, self.end_position = None, None
        self.current_line = None
        self.state = ScoreNavigatorStatus.INVACTIVE
        menu_item.deactivate_item()   
-       self.app_state.set_screen_refresh_status(True)    
+       self.app_state.raise_screen_update_event()    
 
     def is_paused(self):
         return self.state == ScoreNavigatorStatus.PAUSE
@@ -80,7 +82,8 @@ class ScoreNavigator:
             if note.position.x == position.x:
                 print(f"Playing note at position:{note.position} - key id:{note.key_id}")
                 note_key_code = StaffUtils.get_key_code_from_keyid(note.key_id)
-                self.sound_player.play_note(note_key_code, note.duration[4])
+                #self.sound_player.play_note(note_key_code, note.duration[4])
+                self.sound_player.add_note_to_queue(note_key_code, note.duration[4])
 
     def is_live(self):
         return self.is_paused() or self.is_running()

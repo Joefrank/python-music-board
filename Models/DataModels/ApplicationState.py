@@ -43,8 +43,9 @@ class ApplicationState:
         self.events_queue = []
 
     def raise_screen_update_event(self):
-        update_event = ScreenUpdateEvent(2)
-        self.events_queue.append(update_event)
+        screen_update_event = ScreenUpdateEvent()
+        screen_update_event.register(self)
+        self.events_queue.append(screen_update_event)
 
     def screen_update_needed(self) -> bool:
         self.screen_needs_refresh = True

@@ -9,14 +9,6 @@ from Models.Position import Position
 class MenuItem(MouseListener):
 
     def __init__(self, state:MenuItemState, color_config:MenuColorConfig):
-        # self.text = text
-        # self.alternate_text = text if alternate_text is None else alternate_text
-        # self.tooltip = tooltip
-        # self.click_action = click_action
-        # self.unmutable_background = self.background_color = background_color
-        # self.text_color = text_color
-        # self.hover_color = hover_color
-        # self.selected_color = selected_color
         self.state:MenuItemState = state
         self.position = None
         self.dimensions:pygame.Rect = None   
@@ -45,8 +37,9 @@ class MenuItem(MouseListener):
     def set_active(self):
         self.active = True
 
-    def deactivate_item(self):
+    def deactivate_item(self):        
         self.active = False 
+        self.go_to_next_step()
 
     def is_active(self):
         return self.active
