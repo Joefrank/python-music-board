@@ -1,3 +1,4 @@
+from Models.Chord import Chord
 from Models.Position import Position
 class Staff: 
    
@@ -78,6 +79,23 @@ class Staff:
         for interval in self.virtual_intervals:
             notes.extend(interval.get_notes())
         return notes
+    
+    def get_chords(self):
+        chords = []
+        all_staff_notes = self.get_notes()
+        # group all notes by x position into chords
+        for x in range(self.notes_left_offset, self.notes_right_offset + 1):
+            notes_at_x = [note for note in all_staff_notes if note.position.x == x]
+            if notes_at_x:
+                note_list = []                
+                for note in notes_at_x:
+                    note_list.append((note.key_value, note.note_duration[4]))
+                
+                if len(note_list) > 0:
+                    chord = Chord("",note_list , x)                 
+                    chords.append(chord)
+
+        return chords  
     
     def __str__(self):
         lines_str = "-> ".join(str(line) for line in self.lines)

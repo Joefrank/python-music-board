@@ -1,5 +1,6 @@
 from Models.Position import Position
 from Configs.music_config import valid_note_durations, note_modifiers
+from Services.Utils.StaffUtils import StaffUtils
 
 class Note:
 
@@ -21,6 +22,7 @@ class Note:
         self.staccato:bool = None
         self.key:str = key
         self.key_id:str = key_id
+        self.key_value:int = StaffUtils.get_key_code_from_keyid(key_id)
         self.beam_with:Note = beam_with # this is when we link to another note
         self.connected_note:Note = None
         self.stem_inverted = False

@@ -2,6 +2,8 @@
 
 import copy
 
+from Models.Chord import Chord
+
 
 class GrandStaff:   
    
@@ -46,6 +48,26 @@ class GrandStaff:
     def get_notes_offsets(self):
         if len(self.staves) > 0:
             return self.staves[0].get_notes_offsets()
+        
+    def get_chords(self):
+        chords = list[Chord]()
+        staff_count = 0
+        for staff in self.staves:
+            if staff_count == 0:
+                chords.extend(staff.get_chords())
+            else:
+                staff_chords = staff.get_chords()
+                for chord in staff_chords:
+                    # find if chord with same x exists
+                    existing_chord = next((c for c in chords if c.position.x == chord.position.x), None)
+                    if existing_chord is not None:
+                        # add notes to existing chord
+                        existing_chord.append_chord(chord)
+                    else:
+                        chords.append(chord)
+        # sort all chords by x position
+        chords.sort(key=lambda c: c.position.x)
+        return chords
     
     def get_initial_navigator_line(self):
         top_staff_top, _ = self.staves[0].get_initial_navigator_line()

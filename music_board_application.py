@@ -74,7 +74,7 @@ class MusicBoardApplication:
         reset_menu_step = MenuItemStateStep("ResetMM", "Reset", "Click to reset everything.", None, Color.BLUE, Color.WHITE, self.menu_reset_action, self.menu_show_tooltip)
         play_menu_step1 = MenuItemStateStep("PlayMM","Play", "Click to play the score.", None, Color.BLUE, Color.WHITE, self.menu_play_notes, self.menu_show_tooltip)
         play_menu_step2 = MenuItemStateStep("StopMM","Stop", "Click to stop playing the score.", play_menu_step1, Color.RED, Color.WHITE, self.menu_cancel_score, self.menu_show_tooltip)
-        play_menu_step3 = MenuItemStateStep("HoverMM","Play", "Click to stop playing the score.", play_menu_step2, Color.PINK, Color.WHITE, self.menu_play_notes, self.menu_show_tooltip)
+        #play_menu_step3 = MenuItemStateStep("HoverMM","Play", "Click to stop playing the score.", play_menu_step2, Color.PINK, Color.WHITE, self.menu_play_notes, self.menu_show_tooltip)
         
         play_menu_step1.set_next_step(play_menu_step2)
         save_menu_step = MenuItemStateStep("SaveMM", "Save", "Click to save the score.", None, Color.BLUE, Color.WHITE, self.menu_save_score, self.menu_show_tooltip)
@@ -82,7 +82,7 @@ class MusicBoardApplication:
         reset_menu_item_state.add_step(reset_menu_step)
         play_menu_item_state.add_step(play_menu_step1)
         play_menu_item_state.add_step(play_menu_step2)
-        play_menu_item_state.add_step(play_menu_step3)
+       # play_menu_item_state.add_step(play_menu_step3)
         save_menu_item_state.add_step(save_menu_step)
 
         main_menu_color_config = MenuColorConfig(Color.BLUE, Color.PINK, Color.RED, Color.WHITE)
@@ -196,7 +196,7 @@ class MusicBoardApplication:
     def menu_play_notes(self, menu_item:MenuItem): 
         menu_item.set_active()  
         menu_item.go_to_step_by_id("StopMM")      
-        self.state.score_navigator.activate(self.music_score, menu_item)  
+        self.state.score_navigator.activate(self.state.music_score, menu_item)  
         
 
     """ Cancel/stop playing score """

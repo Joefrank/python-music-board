@@ -16,6 +16,8 @@ class MenuItem(MouseListener):
         self.current_step = state.steps[0]  
         self.sub_menu = None 
         self.color_config = color_config
+        self.original_step_background = self.current_step.background_color
+        self.original_step_text_color = self.current_step.text_color
 
     def set_dimensions(self, dimensions: pygame.Rect):
         self.dimensions = dimensions
@@ -24,9 +26,16 @@ class MenuItem(MouseListener):
         if self.active:
             return 
         if self.dimensions.collidepoint(mouse_position.get_tuple()):
-            self.go_to_step_by_id("HoverMM") 
+            # *** just change background color instead of state
+            #self.go_to_step_by_id("HoverMM") 
+            self.current_step.background_color = self.color_config.hover_background_color
+            self.current_step.text_color = self.color_config.text_hover_color
+            # raise screen update event
+            #self.state.application_state.raise_screen_update_event()
         else:           
-            self.go_to_step_by_id("PlayMM")        
+            self.go_to_step_by_id("PlayMM")  
+            self.current_step.background_color = self.original_step_background 
+            self.current_step.text_color   = self.original_step_text_color   
         
     def on_mouse_left_click(self, mouse_position) -> bool:
         if self.dimensions.collidepoint(mouse_position.get_tuple()):            

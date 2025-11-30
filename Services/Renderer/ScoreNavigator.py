@@ -25,7 +25,7 @@ class ScoreNavigator:
         self.app_state = app_state
         self.sound_player = app_state.sound_player
         self.menu_item:MenuItem = None
-        self.notes_to_play = []
+        self.chords_to_play = []
         
     def activate(self, music_score, menu_item:MenuItem):       
        self.music_score = music_score       
@@ -34,7 +34,8 @@ class ScoreNavigator:
        self.current_line = StraightLine(self.start_position, self.end_position, thickness=2)
        self.state = ScoreNavigatorStatus.RUNNING 
        self.menu_item = menu_item
-       self.notes_to_play =  music_score.get_all_notes_in_positional_order()    
+
+       self.chords_to_play =  self.current_staff.get_chords()    
        self.sound_player.start_processing_queue() 
 
     def cancel(self, menu_item:MenuItem):   
@@ -78,12 +79,20 @@ class ScoreNavigator:
         menu_item.deactivate_item()
    
     def play_score_at_position(self, position:Position):
+        # notes to play should be for one staff at a time
+        # notes should be put in chords if they share same x position
         for note in self.notes_to_play:
             if note.position.x == position.x:
                 print(f"Playing note at position:{note.position} - key id:{note.key_id}")
                 note_key_code = StaffUtils.get_key_code_from_keyid(note.key_id)
                 #self.sound_player.play_note(note_key_code, note.duration[4])
                 self.sound_player.add_note_to_queue(note_key_code, note.duration[4])
+
+    def play_score(self):
+        # find chords at this position and current staff then play them
+        for chord in self.chords_to_play:            
+            print(f"Playing chord at position:{chord.position} - notes:{chord.notes}")                         
+            self.sound_player.add_chord_to_queue(chord)
 
     def is_live(self):
         return self.is_paused() or self.is_running()

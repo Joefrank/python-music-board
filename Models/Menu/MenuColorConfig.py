@@ -9,5 +9,5 @@ class MenuColorConfig:
         self.text_color = text_color
         self.hover_background_color = hover_background_color
         self.selected_background_color = selected_background_color
-        self.text_hover_color = text_hover_color
+        self.text_hover_color = text_color if text_hover_color is None else text_hover_color
         self.text_selected_color = text_selected_color

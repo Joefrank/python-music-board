@@ -3,6 +3,7 @@ import threading
 import mido
 import time
 from Configs.music_config import NoteDurationInTicks
+from Models.Chord import Chord
 from Models.GrandStaff import GrandStaff
 from Models.MusicScore import MusicScore
 from Models.Staff import Staff
@@ -17,6 +18,7 @@ class SoundPlayer:
     def __init__(self):
         self.outport = mido.open_output()
         self.note_queue = queue.Queue()
+        self.chord_queue = queue.Queue()
 
     def play_key(self, key_code):
         self.keys_played.append(key_code)
@@ -68,13 +70,19 @@ class SoundPlayer:
         #     return
 
         while True:
-            note, length = self.note_queue.get()   # blocks until a note is available
-            print(f"processing note: {note} - duration:{length}")
-            # Play note
-            self.outport.send(mido.Message('note_on', note=note, velocity=90))
-            time.sleep(length)
-            self.outport.send(mido.Message('note_off', note=note))
-            self.note_queue.task_done()
+            chord = self.chord_queue.get()   # blocks until a note is available
+            for note in chord.notes:                
+                duration = note[1] * self.SECONDS_PER_TICK
+                print(f"processing note: {note[0]} - duration:{note[1]}}")
+                # Play note
+                self.outport.send(mido.Message('note_on', note=note[0], velocity=90))
+
+            time.sleep(duration)
+
+            for note in chord.notes:
+                self.outport.send(mido.Message('note_off', note=note[0]))
+                
+            self.chord_queue.task_done()
 
     def start_processing_queue(self):
         # Start MIDI thread
@@ -82,6 +90,9 @@ class SoundPlayer:
 
     def add_note_to_queue(self, note, length):
         self.note_queue.put((note, length))
+
+    def add_chord_to_queue(self, chard: Chord):       
+           
 
         
     
