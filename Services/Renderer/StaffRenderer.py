@@ -81,7 +81,7 @@ class StaffRenderer(BaseRenderer):
         mouse_click_position = self.state.mouse_click.get_current_position()
         
         # check if it matches this staff item and render note potentially
-        if (mouse_click_position is not None 
+        if (mouse_click_position is not None and self.state.note_modifier is None
             and staff_item.mouse_hovering_around(mouse_click_position, StaffConfig.STAFF_ITEM_THRESHOLD)):            
             new_note = self.render_note_at_position(mouse_click_position, staff_item)            
             #self.draw_note(new_note.duration, staff_item.key_id, 40, 30, new_note.position, color=Color.RED)

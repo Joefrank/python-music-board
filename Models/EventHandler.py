@@ -69,12 +69,16 @@ class EventHandler:
         click_position = Position(event.pos[0], event.pos[1])
         self.state.register_mouse_click_event(click_position)
         nearest_note = None
+        
+        print(f"Modifier:{note_modifier}")
         # if any modifier (key down) has been registered before click. unary modifier only in this case
-        if note_modifier is not None and note_modifier[1] == 1:
+        if note_modifier is not None:
             # check if there is any note near click and modify it           
             nearest_note = self.state.check_click_around_note(click_position)
             if nearest_note is not None:
                 self.state.effect_note_modifier(nearest_note, note_modifier)
+                # clear this to avoid creating new note because we changed the nearest_note
+                self.state.mouse_click.reset_current_position() 
 
         # this will cause a new note to be added if no nearest note has been found.
         if nearest_note is None:
@@ -86,6 +90,8 @@ class EventHandler:
         self.state.register_key_down(key_name)
 
     def _handle_key_up(self) -> None:
+        self.state.handle_pending_events()
+        self.state.set_screen_refresh_status(True)
         self.state.cancel_key_down()
 
     

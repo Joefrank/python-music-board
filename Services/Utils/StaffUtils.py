@@ -16,8 +16,7 @@ class StaffUtils:
     @staticmethod
     def resolve_position_with_margins(position, margins):       
         x = position.x + margins[0] - margins[2]
-        y = position.y + margins[1] - margins[3] 
-        #print(f"staff top left:{position} - margin:{margins}")      
+        y = position.y + margins[1] - margins[3]  
         return Position(x, y)
 
     @staticmethod
@@ -114,16 +113,18 @@ class StaffUtils:
         if key not in note_modifiers:
             return None
         
-        match key:
-            case 's' | 'S':                 
+        match key.lower():
+            case 's':                 
                  return NoteModifierDetails.STACCATO
-            case 'x' | 'X':
+            case 'x':
                  return NoteModifierDetails.EXTEND
-            case 'b' | 'B':
+            case 'b':
                  return NoteModifierDetails.BEAM
-            case 'd' | 'D':
+            case 'd':
                  return NoteModifierDetails.DELETE
-            case 'c' | 'C':
+            case 'c':
                  return NoteModifierDetails.CONNECT
-            case 'i' | 'I':
+            case 'i':
                  return NoteModifierDetails.INVERT_STEM
+            case 'l':
+                 return NoteModifierDetails.LINK

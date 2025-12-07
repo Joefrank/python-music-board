@@ -48,7 +48,7 @@ class Note:
             case 'd' | 'D':
                  self.staff_item.delete_note(self)           
             case 'i' | 'I':
-                 self.stem_inverted = True
+                 self.stem_inverted = not self.stem_inverted
 
     def implement_binary_modifier(self, modifier, linked_note):
         if modifier not in note_modifiers:
@@ -57,13 +57,15 @@ class Note:
             case 'b' | 'B':
                  self.beam_with = linked_note          
             case 'c' | 'C':
-                 self.connected_note = linked_note
-            
+                 self.connected_note = linked_note 
+
     def is_near_position(self, position: Position) -> bool:
          return ((self.position.x - 40 <= position.x <= self.position.x + 40)
              and (self.position.y - 40 <= position.y <= self.position.y + 40))
 
-
+    def get_distance_to(self, position:Position):
+        return (self.position.x - position.x)**2 + (self.position.y - position.y)**2
+    
     def __str__(self):
         return f"Note {self.key_id} - Position:{self.position} - Order: {self.order} - Extended:{self.extended}" + \
             f" Stackato:{self.staccato} - Duration: {self.duration}"

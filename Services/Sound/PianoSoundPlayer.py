@@ -48,8 +48,6 @@ class SoundPlayer:
         # Note ON
         note_on = mido.Message('note_on', note=note, velocity=velocity, channel=channel)
         self.outport.send(note_on)
-
-        print(f"duration:{duration} - ticks:{self.SECONDS_PER_TICK}")
         # Wait for note duration
         time.sleep(duration * self.SECONDS_PER_TICK)
 
@@ -71,18 +69,21 @@ class SoundPlayer:
 
         while True:
             chord = self.chord_queue.get()   # blocks until a note is available
-            for note in chord.notes:                
-                duration = note[1] * self.SECONDS_PER_TICK
-                print(f"processing note: {note[0]} - duration:{note[1]}}")
-                # Play note
-                self.outport.send(mido.Message('note_on', note=note[0], velocity=90))
-
-            time.sleep(duration)
-
-            for note in chord.notes:
-                self.outport.send(mido.Message('note_off', note=note[0]))
-                
+            self.play_chord(chord)                
             self.chord_queue.task_done()
+
+    def play_chord(self, chord: Chord):
+        note_details = chord.get_playable_notes()
+        for note in note_details:                
+            duration = note[1] * self.SECONDS_PER_TICK
+            print(f"processing note: {note[0]} - duration:{duration}")
+            # Play note
+            self.outport.send(mido.Message('note_on', note=note[0], velocity=90))            
+       
+        time.sleep(duration)
+
+        for note in note_details:
+            self.outport.send(mido.Message('note_off', note=note[0]))
 
     def start_processing_queue(self):
         # Start MIDI thread
@@ -91,8 +92,8 @@ class SoundPlayer:
     def add_note_to_queue(self, note, length):
         self.note_queue.put((note, length))
 
-    def add_chord_to_queue(self, chard: Chord):       
-           
+    def add_chord_to_queue(self, chord: Chord):       
+        self.chord_queue.put(chord)
 
         
     

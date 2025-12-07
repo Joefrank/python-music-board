@@ -7,6 +7,7 @@ from pygame import Surface
 from Configs.screen_config import MouseEventType
 from Configs.music_config import valid_note_durations, note_modifiers
 from Models import MusicScore, Note
+from Models.Chord import Chord
 from Models.Events.ScreenUpdateEvent import ScreenUpdateEvent
 from Models.GrandStaff import GrandStaff
 from Models.Menu import MainMenu
@@ -41,6 +42,7 @@ class ApplicationState:
         self.mouse_hover = MouseEvent(MouseEventType.HOVER)
         self.score_navigator = None
         self.events_queue = []
+        self.pending_chord: Chord = None
 
     def raise_screen_update_event(self):
         screen_update_event = ScreenUpdateEvent()
@@ -86,19 +88,29 @@ class ApplicationState:
        return errors
     
     """ Registers key down as note duration."""
-    def register_key_down(self, key_name):
-        if key_name.isnumeric(): # this is key duration
+    def register_key_down(self, key_name):   
+          
+        if key_name.isnumeric(): # this is potentially a key duration
             note_duration_details = next((item for item in valid_note_durations if item[0] == key_name), None)
             # At this stage, we only register note duration details.
             if note_duration_details is not None:
                 self.note_duration = note_duration_details # this is font code
         elif key_name in note_modifiers:
-            self.note_modifier = StaffUtils.get_modifier_by_key(key_name)
-            # if key is unary, we want to clear mouse over recording
-            if self.note_modifier[1] == 1:
-                self.mouse_hover.reset_current_position()
-                self.set_screen_refresh_status(True)
-           
+            self.note_modifier = StaffUtils.get_modifier_by_key(key_name)          
+            # We want to clear the mouse tracking for any note modifier 
+            # TODO: leave tracker until you come to close to a existing note
+            if self.note_modifier is not None:
+                self.hide_mouse_tracker()
+    
+    def hide_mouse_tracker(self):
+        self.mouse_hover.reset_current_position()                   
+        self.set_screen_refresh_status(True)      
+    
+    def handle_pending_events(self):
+        # TODO: play the pending chord and record it
+        if self.pending_chord is not None:
+            self.sound_player.play_chord(self.pending_chord)
+            self.pending_chord = None
 
     def cancel_key_down(self):
         self.note_duration = None
@@ -117,11 +129,16 @@ class ApplicationState:
                 return nearest_note
         return None   
     
-    def effect_note_modifier(self, note, modifier):
+    def effect_note_modifier(self, note: Note, modifier):        
         if modifier[1] == 1:
             note.implement_unary_modifier(modifier)
         elif modifier[1] == 2:
             note.implement_binary_modifier(modifier)
+        elif modifier[1].lower() == 'x':   
+            print(f"Nearest note: {note.position} - {note.key_id} - effecting modifier: {modifier[1]}")        
+            if self.pending_chord is None:
+                self.pending_chord = Chord("", note.position.x)           
+            self.pending_chord.add_note(note)
 
     def set_main_menu(self, menu:MainMenu):
         self.main_menu = menu

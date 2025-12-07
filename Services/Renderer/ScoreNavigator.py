@@ -34,9 +34,14 @@ class ScoreNavigator:
        self.current_line = StraightLine(self.start_position, self.end_position, thickness=2)
        self.state = ScoreNavigatorStatus.RUNNING 
        self.menu_item = menu_item
+       self.chords_to_play =  self.current_staff.get_chords()  
 
-       self.chords_to_play =  self.current_staff.get_chords()    
        self.sound_player.start_processing_queue() 
+
+       # Check if the thread sent new display text
+       while not self.display_queue.empty():
+        current_text = self.display_queue.get()
+        print(current_text)
 
     def cancel(self, menu_item:MenuItem):   
        self.start_position, self.end_position = None, None
@@ -72,7 +77,8 @@ class ScoreNavigator:
                 self.current_line = StraightLine(self.start_position, self.end_position, thickness=2)
         
         self.current_line.translateTo(1,0)
-        self.play_score_at_position(self.current_line.start_position)
+        #self.play_score_at_position(self.current_line.start_position)
+        self.play_score()
 
     def stop(self, menu_item:MenuItem):
         self.state = ScoreNavigatorStatus.PAUSE
@@ -91,7 +97,7 @@ class ScoreNavigator:
     def play_score(self):
         # find chords at this position and current staff then play them
         for chord in self.chords_to_play:            
-            print(f"Playing chord at position:{chord.position} - notes:{chord.notes}")                         
+            print(f"Adding chord to queue:{chord.x_offset} - notes:{chord.notes.get_playable_notes()}")                         
             self.sound_player.add_chord_to_queue(chord)
 
     def is_live(self):

@@ -53,6 +53,16 @@ class Position:
         self.x += x
         self.y += y
 
+    def moveTo(self, x, y):
+        self.x = x
+        self.y = y
+
+    def moveHorizontallyTo(self, x):
+        self.x = x  
+
+    def moveVerticallyTo(self, y):
+        self.y = y
+        
     def is_above_position(self, position):
         return self.y < position.y
     

@@ -1,5 +1,7 @@
-from Models.Chord import Chord
+from Models import Chord
+from Models.Note import Note
 from Models.Position import Position
+
 class Staff: 
    
     
@@ -43,16 +45,46 @@ class Staff:
     def get_height(self):
         return self.bottom_position.y - self.top_position.y 
 
+    """ The nearest note to a position is the note that comes closer in distance to a specific position on the staff. """
     def find_nearest_note(self, position):
-        for line in self.lines:
-            note = line.find_nearest_note(position)
-            if note is not None:
-                return note
-        for interval in self.intervals:
-            note = interval.find_nearest_note(position)
-            if note is not None:
-                return note
-        return None
+        # Collect all note groups from both lines and intervals
+        note_groups = [line.get_notes() for line in self.lines] + \
+                    [interval.get_notes() for interval in self.intervals]
+
+        return self._find_nearest_in_groups(note_groups, position)
+
+
+    def _find_nearest_in_groups(self, note_groups, position):
+        smallest_distance = -1
+        nearest_note = None
+
+        for notes in note_groups:
+            distance, note = self.find_nearest_note_from_notes(notes, position)
+            if distance != -1 and (smallest_distance == -1 or distance < smallest_distance):
+                smallest_distance = distance
+                nearest_note = note
+
+        return smallest_distance, nearest_note
+
+
+    def find_nearest_note_from_notes(self, notes, position):
+        if not notes:
+            return -1, None
+
+        smallest_distance = -1
+        nearest_note = None
+
+        for note in notes:
+            distance = note.get_distance_to(position)
+
+            if distance == 0:
+                return 0, note
+
+            if smallest_distance == -1 or distance < smallest_distance:
+                smallest_distance = distance
+                nearest_note = note
+
+        return smallest_distance, nearest_note
     
     def get_top_left(self):
         return self.top_position
@@ -89,10 +121,11 @@ class Staff:
             if notes_at_x:
                 note_list = []                
                 for note in notes_at_x:
-                    note_list.append((note.key_value, note.note_duration[4]))
+                    note_list.append(note)
                 
                 if len(note_list) > 0:
-                    chord = Chord("",note_list , x)                 
+                    chord = Chord("", x)   
+                    chord.set_notes(note_list)              
                     chords.append(chord)
 
         return chords  

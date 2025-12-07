@@ -16,7 +16,7 @@ musical_rests = [
     {"name": "Sixteenth rest", "no_of_beats": 0.25, "font_code": "\uE4E7"}
 ]
 
-note_modifiers = ['s','x','b','d','c','i','S','X','B','D','C','I']
+note_modifiers = ['s','x','b','d','c','i','l','S','X','B','D','C','I','L']
 
 @dataclass
 class NoteModifierDetails:
@@ -27,6 +27,7 @@ class NoteModifierDetails:
     INVERT_STEM = (['I', 'i'], 1) # invert stem of new/existing note on key press + click
     BEAM = (['B', 'b'], 2) # beem this note to previous if it exist.
     CONNECT = (['C', 'c'], 2) # connect this note to previous if one exist
+    LINK = (['L','l'], 'x') # link notes to create a chord between staves.
 
 @dataclass
 class NoteDurationInTicks:
