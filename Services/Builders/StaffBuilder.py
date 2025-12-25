@@ -194,7 +194,8 @@ class StaffBuilder:
     def calculate_left_collateral_offset(self, clef, key_signature):
         signature_len = len(supported_clef_settings[clef]["signature_position_pattern"][key_signature])        
         clef_width = 40
-        return clef_width + (signature_len * 20)
+        min_left_offset = 60 if signature_len < 3 else  (signature_len * 20) # minimum left offset if no clef or signature
+        return clef_width + min_left_offset 
 
         
 

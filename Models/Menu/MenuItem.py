@@ -40,8 +40,7 @@ class MenuItem(MouseListener):
     def on_mouse_left_click(self, mouse_position) -> bool:
         if self.dimensions.collidepoint(mouse_position.get_tuple()):            
             self.active = not self.active
-            self.current_step.click_action(self)
-            print(self.current_step)
+            self.current_step.click_action(self)            
         
     def set_active(self):
         self.active = True

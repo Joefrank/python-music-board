@@ -1,5 +1,6 @@
+from Configs.screen_config import StaffConfig
 from Models.Position import Position
-from Configs.music_config import valid_note_durations, note_modifiers
+from Configs.music_config import NoteDurationInTicks, valid_note_durations, note_modifiers
 from Services.Utils.StaffUtils import StaffUtils
 
 class Note:
@@ -60,11 +61,23 @@ class Note:
                  self.connected_note = linked_note 
 
     def is_near_position(self, position: Position) -> bool:
-         return ((self.position.x - 40 <= position.x <= self.position.x + 40)
-             and (self.position.y - 40 <= position.y <= self.position.y + 40))
+         proximity_threshold = StaffConfig.NOTE_PROXIMITY_THRESHOLD // 2
+         return ((self.position.x - proximity_threshold <= position.x <= self.position.x + proximity_threshold)
+             and (self.position.y - proximity_threshold <= position.y <= self.position.y + proximity_threshold))
 
     def get_distance_to(self, position:Position):
         return (self.position.x - position.x)**2 + (self.position.y - position.y)**2
+    
+    def get_exact_duration(self):
+        duration = self.duration[4] * 1.5 if self.extended else self.duration[4] 
+        exact_duration = duration       
+        rest_duration = 0
+
+        if self.staccato: # staccato is 1/4 of one tick
+            exact_duration = NoteDurationInTicks.QUARTER * 0.25
+            rest_duration = (duration - exact_duration) if duration > NoteDurationInTicks.QUARTER else 0
+              
+        return exact_duration, rest_duration
     
     def __str__(self):
         return f"Note {self.key_id} - Position:{self.position} - Order: {self.order} - Extended:{self.extended}" + \

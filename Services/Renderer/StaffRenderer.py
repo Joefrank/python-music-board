@@ -88,7 +88,10 @@ class StaffRenderer(BaseRenderer):
             self.render_note(new_note, True, Color.RED, Color.GREY)
             self.state.set_last_added_note(new_note)
             note_key_code = StaffUtils.get_key_code_from_keyid(new_note.key_id)
-            self.state.sound_player.play_note(note_key_code, new_note.duration[4])
+            note_duration, rest_duration = new_note.get_exact_duration()
+            self.state.sound_player.play_note(note_key_code, note_duration)
+            if rest_duration > 0:
+                self.state.sound_player.play_note(0, rest_duration)  # 0 key_value for rest
             self.state.mouse_click.reset_current_position()
 
         # if staff item has notes, we want to display them.
@@ -265,7 +268,7 @@ class StaffRenderer(BaseRenderer):
             modulation_item_index += 1
             last_modulation_x_offset = staff_item_position.x
 
-        return last_modulation_x_offset
+        return 90 if len(signature_details) < 1 else last_modulation_x_offset
     
     """
         Displays modulation at specific position # or b on line or interval

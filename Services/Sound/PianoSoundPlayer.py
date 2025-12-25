@@ -10,7 +10,7 @@ from Models.Staff import Staff
 
 class SoundPlayer:
     keys_played = []
-    BPM = 120
+    BPM = 120 # Beats Per Minute: Tempo setting
     TICKS_PER_BEAT = 480
     SECONDS_PER_BEAT = 60 / BPM
     SECONDS_PER_TICK = SECONDS_PER_BEAT / TICKS_PER_BEAT
@@ -48,6 +48,7 @@ class SoundPlayer:
         # Note ON
         note_on = mido.Message('note_on', note=note, velocity=velocity, channel=channel)
         self.outport.send(note_on)
+        
         # Wait for note duration
         time.sleep(duration * self.SECONDS_PER_TICK)
 
@@ -60,26 +61,26 @@ class SoundPlayer:
             self.play_note(note_key_code, duration_ticks, velocity=v)
 
     def midi_worker(self, port_name='Microsoft GS Wavetable Synth'):
-        # try:
-        #     outport = mido.open_output(port_name)
-        # except IOError:
-        #     print("Could not open MIDI output. Available ports:")
-        #     print(mido.get_output_names())
-        #     return
-
-        while True:
-            chord = self.chord_queue.get()   # blocks until a note is available
-            self.play_chord(chord)                
-            self.chord_queue.task_done()
+         try:
+              while True:
+                chord = self.chord_queue.get()  # blocks until a chord is available                
+                self.play_chord(chord)                
+                self.chord_queue.task_done()
+         except IOError:
+             print("Could not play chord:")
+             print(mido.get_output_names())
+             return
+       
 
     def play_chord(self, chord: Chord):
         note_details = chord.get_playable_notes()
+        
         for note in note_details:                
-            duration = note[1] * self.SECONDS_PER_TICK
-            print(f"processing note: {note[0]} - duration:{duration}")
+            duration = note[1] * self.SECONDS_PER_TICK  
+            print(f"Playing chord note: {note[0]} - Duration (s): {duration}")          
             # Play note
             self.outport.send(mido.Message('note_on', note=note[0], velocity=90))            
-       
+        
         time.sleep(duration)
 
         for note in note_details:
@@ -95,5 +96,4 @@ class SoundPlayer:
     def add_chord_to_queue(self, chord: Chord):       
         self.chord_queue.put(chord)
 
-        
-    
+   

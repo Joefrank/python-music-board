@@ -9,9 +9,7 @@ class Chord:
         self.x_offset = x_offset
 
     def add_note(self, note: Note):
-        print(f"Note before move:{note.position}")
         note.position.moveHorizontallyTo(self.x_offset)
-        print(f"Note after move:{note.position}")
         self.notes.append(note)
         self.reassess_name()
 
@@ -27,10 +25,21 @@ class Chord:
         return True
         
     def reassess_name(self):
-        # logic to reassess chord name based on notes
-        print(f"chord notes: {self.notes}")   
+        # logic to reassess chord name based on notes        
         pass
 
     def get_playable_notes(self) -> list[(int, int)]:
-        return [(note.key_value, note.duration[4]) for note in self.notes]
-        
+        notes_to_play = []
+        for note in self.notes:
+            note_duration, rest_duration = note.get_exact_duration()
+            notes_to_play.append((note.key_value, note_duration))
+            if rest_duration > 0:
+                notes_to_play.append((0, rest_duration))  # 0 key_value for rest
+
+        return notes_to_play
+    
+    def __str__(self):
+        return f"Chord: {self.name} - Notes: " + " | ".join(str(note) for note in self.notes)
+
+
+    

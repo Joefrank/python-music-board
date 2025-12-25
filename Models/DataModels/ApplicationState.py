@@ -134,8 +134,7 @@ class ApplicationState:
             note.implement_unary_modifier(modifier)
         elif modifier[1] == 2:
             note.implement_binary_modifier(modifier)
-        elif modifier[1].lower() == 'x':   
-            print(f"Nearest note: {note.position} - {note.key_id} - effecting modifier: {modifier[1]}")        
+        elif modifier[1].lower() == 'x':          
             if self.pending_chord is None:
                 self.pending_chord = Chord("", note.position.x)           
             self.pending_chord.add_note(note)

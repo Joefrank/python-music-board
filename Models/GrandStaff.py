@@ -59,14 +59,15 @@ class GrandStaff:
                 staff_chords = staff.get_chords()
                 for chord in staff_chords:
                     # find if chord with same x exists
-                    existing_chord = next((c for c in chords if c.position.x == chord.position.x), None)
+                    existing_chord = next((c for c in chords if c.x_offset == chord.x_offset), None)
                     if existing_chord is not None:
                         # add notes to existing chord
                         existing_chord.append_chord(chord)
                     else:
                         chords.append(chord)
+            staff_count += 1
         # sort all chords by x position
-        chords.sort(key=lambda c: c.position.x)
+        chords.sort(key=lambda c: c.x_offset)
         return chords
     
     def get_initial_navigator_line(self):

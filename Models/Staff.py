@@ -1,5 +1,5 @@
 from Models import Chord
-from Models.Note import Note
+from Models import Note
 from Models.Position import Position
 
 class Staff: 
@@ -46,12 +46,15 @@ class Staff:
         return self.bottom_position.y - self.top_position.y 
 
     """ The nearest note to a position is the note that comes closer in distance to a specific position on the staff. """
-    def find_nearest_note(self, position):
+    def find_nearest_note(self, position) -> Note:
         # Collect all note groups from both lines and intervals
         note_groups = [line.get_notes() for line in self.lines] + \
-                    [interval.get_notes() for interval in self.intervals]
+                    [interval.get_notes() for interval in self.intervals] + \
+                    [line.get_notes() for line in self.virtual_lines] + \
+                    [interval.get_notes() for interval in self.virtual_intervals]
 
-        return self._find_nearest_in_groups(note_groups, position)
+        shortest_distance, nearest_note = self._find_nearest_in_groups(note_groups, position)
+        return nearest_note
 
 
     def _find_nearest_in_groups(self, note_groups, position):
@@ -64,7 +67,10 @@ class Staff:
                 smallest_distance = distance
                 nearest_note = note
 
-        return smallest_distance, nearest_note
+        if nearest_note is None or nearest_note.is_near_position(position) == False:            
+            return -1, None
+        else:
+            return smallest_distance, nearest_note
 
 
     def find_nearest_note_from_notes(self, notes, position):
@@ -116,7 +122,7 @@ class Staff:
         chords = []
         all_staff_notes = self.get_notes()
         # group all notes by x position into chords
-        for x in range(self.notes_left_offset, self.notes_right_offset + 1):
+        for x in range(int(self.notes_left_offset), int(self.notes_right_offset) + 1):
             notes_at_x = [note for note in all_staff_notes if note.position.x == x]
             if notes_at_x:
                 note_list = []                
@@ -124,7 +130,7 @@ class Staff:
                     note_list.append(note)
                 
                 if len(note_list) > 0:
-                    chord = Chord("", x)   
+                    chord = Chord.Chord("", x)   
                     chord.set_notes(note_list)              
                     chords.append(chord)
 

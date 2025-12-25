@@ -19,6 +19,18 @@ musical_rests = [
 note_modifiers = ['s','x','b','d','c','i','l','S','X','B','D','C','I','L']
 
 @dataclass
+class VelicityLevels:
+    PPP: int = 20 # Pianississimo
+    PP: int = 40 # Pianissimo
+    P: int = 60 # Piano
+    MP: int = 80 # Mezzo-piano
+    MF: int = 100 # Mezzo-forte
+    F: int = 110 # Forte
+    FF: int = 120 # Fortissimo
+    FFF: int = 127 # Fortississimo
+
+
+@dataclass
 class NoteModifierDetails:
     # format is [list] of keys, no of items affected by modifier
     DELETE = (['D','d'], 1) # delete single note when this key pressed and click on note

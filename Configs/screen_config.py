@@ -73,6 +73,7 @@ class StaffConfig:
     VIRTUAL_LINE_WIDTH:  int = 20
     STAFF_ITEM_THRESHOLD: int = 2
     STACCATO_SYMBOL_SIZE: int = 40
+    NOTE_PROXIMITY_THRESHOLD: int = 40
     
 @dataclass
 class GenericConfig:

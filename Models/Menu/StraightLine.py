@@ -1,3 +1,6 @@
+from Models.Position import Position
+
+
 class StraightLine:
 
      def __init__(self, start_position, end_position, thickness):
@@ -19,5 +22,9 @@ class StraightLine:
         self.start_position.translateTo(x, y)
         self.end_position.translateTo(x, y)
         
+     def moveTo(self, start_position: Position, end_position: Position):
+        self.start_position = start_position
+        self.end_position = end_position
+
      def __str__(self):
         return f"Straight Line - start: {self.start_position} - end: {self.end_position}"

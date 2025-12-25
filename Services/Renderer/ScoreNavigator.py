@@ -28,20 +28,25 @@ class ScoreNavigator:
         self.chords_to_play = []
         
     def activate(self, music_score, menu_item:MenuItem):       
-       self.music_score = music_score       
-       self.current_staff = self.music_score.staves_sequence[self.current_staff_index];
+       self.music_score = music_score 
+       self.get_next_staff_for_navigation();
        self.start_position, self.end_position = self.current_staff.get_initial_navigator_line()
        self.current_line = StraightLine(self.start_position, self.end_position, thickness=2)
        self.state = ScoreNavigatorStatus.RUNNING 
-       self.menu_item = menu_item
-       self.chords_to_play =  self.current_staff.get_chords()  
+       self.menu_item = menu_item       
+       self.navigate_staff(self.current_staff) 
+       self.sound_player.start_processing_queue()
 
-       self.sound_player.start_processing_queue() 
+       self.play_score()  # Play chords at initial position 
 
-       # Check if the thread sent new display text
-       while not self.display_queue.empty():
-        current_text = self.display_queue.get()
-        print(current_text)
+    def get_next_staff_for_navigation(self):
+        if self.current_staff_index < len(self.music_score.staves_sequence):            
+            self.current_staff = self.music_score.staves_sequence[self.current_staff_index]
+            self.current_staff_index += 1
+        
+    
+    def navigate_staff(self, staff): 
+        self.chords_to_play = staff.get_chords()
 
     def cancel(self, menu_item:MenuItem):   
        self.start_position, self.end_position = None, None
@@ -76,9 +81,14 @@ class ScoreNavigator:
                 self.start_position, self.end_position = self.current_staff.get_initial_navigator_line()
                 self.current_line = StraightLine(self.start_position, self.end_position, thickness=2)
         
-        self.current_line.translateTo(1,0)
-        #self.play_score_at_position(self.current_line.start_position)
-        self.play_score()
+        next_chord =self.play_score()
+        if next_chord is None:
+            return False
+        start_position = Position(next_chord.x_offset, self.current_line.start_position.y)
+        end_position = Position(next_chord.x_offset, self.current_line.end_position.y)
+        self.current_line.moveTo(start_position, end_position)
+        return True
+        
 
     def stop(self, menu_item:MenuItem):
         self.state = ScoreNavigatorStatus.PAUSE
@@ -89,16 +99,18 @@ class ScoreNavigator:
         # notes should be put in chords if they share same x position
         for note in self.notes_to_play:
             if note.position.x == position.x:
-                print(f"Playing note at position:{note.position} - key id:{note.key_id}")
                 note_key_code = StaffUtils.get_key_code_from_keyid(note.key_id)
                 #self.sound_player.play_note(note_key_code, note.duration[4])
                 self.sound_player.add_note_to_queue(note_key_code, note.duration[4])
 
+
     def play_score(self):
-        # find chords at this position and current staff then play them
-        for chord in self.chords_to_play:            
-            print(f"Adding chord to queue:{chord.x_offset} - notes:{chord.notes.get_playable_notes()}")                         
-            self.sound_player.add_chord_to_queue(chord)
+        if len(self.chords_to_play) == 0:
+            return None
+        next_chord = self.chords_to_play.pop(0)
+        self.sound_player.add_chord_to_queue(next_chord)
+        #self.sound_player.play_chord(next_chord)
+        return next_chord         
 
     def is_live(self):
         return self.is_paused() or self.is_running()

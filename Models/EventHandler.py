@@ -70,7 +70,6 @@ class EventHandler:
         self.state.register_mouse_click_event(click_position)
         nearest_note = None
         
-        print(f"Modifier:{note_modifier}")
         # if any modifier (key down) has been registered before click. unary modifier only in this case
         if note_modifier is not None:
             # check if there is any note near click and modify it           
