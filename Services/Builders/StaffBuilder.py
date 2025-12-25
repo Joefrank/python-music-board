@@ -29,10 +29,11 @@ class StaffBuilder:
     def get_current_staff(self):
         return self.staff
     
-    def init_staff(self, clef, time_signature, key_signature, staff_vertical_padding, staff_top_left, staff_width):
+    def init_staff(self, clef, time_signature, key_signature, staff_vertical_padding, 
+                   staff_top_left, staff_width, tempo, velocity):
         self.lines = []
         self.intervals = []
-        self.staff = Staff(clef, time_signature, key_signature)
+        self.staff = Staff(clef, time_signature, key_signature,tempo, velocity)
         self.staff_vertical_padding = staff_vertical_padding
         self.staff_top_left = staff_top_left
         self.staff_width = staff_width

@@ -12,16 +12,9 @@ class MusicScore:
         self.top_left_position = top_left
         self.score_width = score_width
         self.title = title
-        self.raw_credits = credits # these need processing
-        self.tempo = 80  # default tempo
-       
-   
-    """ This duration is to be passed to the mido output for notes timing. """
-    def get_duration_in_seconds(self, duration_in_ticks: int) -> float:
-        seconds_per_beat = 60 / self.tempo
-        seconds_per_tick = seconds_per_beat / self.TICKS_PER_BEAT
-        return duration_in_ticks * seconds_per_tick
-    
+        self.raw_credits = credits # these need processing    
+      
+     
     def add_staff(self, staff):
         self.staves_sequence.append(staff)
 
@@ -36,12 +29,4 @@ class MusicScore:
         for staff in self.staves_sequence:
             notes.extend(staff.get_notes())
         return sorted(notes, key=lambda note: note.position.x)
-    
-    def set_tempo(self, tempo: int):
-        self.tempo = tempo
-
-    def get_tempo(self) -> int:
-        return self.tempo
-
-   
   

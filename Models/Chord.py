@@ -28,13 +28,13 @@ class Chord:
         # logic to reassess chord name based on notes        
         pass
 
-    def get_playable_notes(self) -> list[(int, int, bytes)]:
+    def get_playable_notes(self) -> list[(int, int, int, int)]:
         notes_to_play = []
         for note in self.notes:
             note_duration, rest_duration = note.get_exact_duration()
-            notes_to_play.append((note.key_value, note_duration, note.get_velocity()))
+            notes_to_play.append((note.key_value, note_duration, note.get_velocity(), note.get_tempo()))
             if rest_duration > 0:
-                notes_to_play.append((0, rest_duration, 0))  # 0 key_value for rest
+                notes_to_play.append((0, rest_duration, 0, note.get_tempo()))  # 0 key_value for rest
 
         return notes_to_play
     

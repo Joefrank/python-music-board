@@ -1,3 +1,4 @@
+from Configs.music_config import VelicityLevels
 from Models import Chord
 from Models import Note
 from Models.Position import Position
@@ -5,7 +6,7 @@ from Models.Position import Position
 class Staff: 
    
     
-    def __init__(self, clef, time_signature, key_signature):       
+    def __init__(self, clef, time_signature, key_signature, tempo:int, velocity:int):       
          # lines and intervals
         self.lines = [] 
         self.intervals = []
@@ -32,6 +33,8 @@ class Staff:
         self.clef = clef
         self.time_signature = time_signature
         self.key_signature = key_signature
+        self.velocity:int = velocity
+        self.tempo:int = tempo
       
     def set_notes_boundaries(self):
         self.notes_left_offset = self.top_line.line_collateral_boundaries.left_boundary

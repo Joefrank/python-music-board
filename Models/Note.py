@@ -14,14 +14,16 @@ class Note:
         key_id: the exact piano music key to be played for this note
         beam_width: if this note has another key it is connected with.
     """
-    def __init__(self, staff_item, duration, position, order, extended, key, key_id, beam_with=None):
+    def __init__(self, staff_item, duration, position, order, extended, key, key_id, beam_with=None, 
+                 tempo=80, velocity=60):
         self.staff_item = staff_item
         self.duration:tuple = duration # in beats
         self.position:Position = position # position to center rest around
         self.order:int = order
         self.extended:bool = extended
         self.staccato:bool = None
-        self.velocity:int = 64
+        self.velocity:int = velocity # this is intensity of the note. e.g. Piano, Forte, Fortissimo
+        self.tempo:int = tempo # this is used to calculate the duration of the note.
         self.key:str = key
         self.key_id:str = key_id
         self.key_value:int = StaffUtils.get_key_code_from_keyid(key_id)
@@ -86,6 +88,15 @@ class Note:
     def set_velocity(self, velocity):
         self.velocity = velocity
     
+    def get_tempo(self):
+        return self.tempo
+    
+    def set_tempo(self, tempo):
+        self.tempo = tempo
+    
+    def highlight(self, color):
+        self.color = color
+        
     def __str__(self):
         return f"Note {self.key_id} - Position:{self.position} - Order: {self.order} - Extended:{self.extended}" + \
             f" Stackato:{self.staccato} - Duration: {self.duration}"

@@ -2,6 +2,7 @@
 
 import pygame
 import logging
+from Configs.constants import SoundPlayerEventConstants
 from Models import Note
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.Events.Event import Event
@@ -45,7 +46,21 @@ class EventHandler:
         if next_event is not None:
             next_event.notify()
       
+    def handle_polling(self) -> None:
+        """Handle polling-based updates."""         
+        # Poll for sound feedback events       
+        while not self.sound_player.feedback_queue.empty():
+            print("Polling queue has events...")
+            feedback_event = self.sound_player.feedback_queue.get()
+            event_type, event_data = feedback_event
+            print(f"feedback_event: {event_type}, {event_data}")
+            if event_type == SoundPlayerEventConstants.CHORD_START:
+                self.state.highlight_chord(event_data, True)
+            elif event_type == SoundPlayerEventConstants.CHORD_END:
+                self.state.highlight_chord(event_data, False)
+            self.sound_player.feedback_queue.task_done()
 
+            
     def _handle_quit(self) -> None:
         """Handle application quit event."""
         self.logger.info("Application quit requested")

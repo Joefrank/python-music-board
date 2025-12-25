@@ -2,7 +2,7 @@ import logging
 import pygame
 
 from Configs import screen_config
-from Configs.music_config import BASS_CLEF, TREBLE_CLEF
+from Configs.music_config import BASS_CLEF, TREBLE_CLEF, VelicityLevels
 from Models import MusicScore
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.EventHandler import EventHandler
@@ -40,7 +40,8 @@ class MusicBoardApplication:
     def initialize(self) -> None:
         """ Initializes everything to do with music-board application """
        #try:
-        default_time_signature, default_key_signature, score_title, tempo = "3x4", "F", "Praise to the Lord", 90
+        default_time_signature, default_key_signature, score_title, tempo, velocity =\
+              "3x4", "F", "Praise to the Lord", 90, VelicityLevels.MF
         score_credits = [
             ["Anonymous, 1625", "Tr. by Theodore Baker, 1917 (1851-1934)"],
             ["KREMSER Irregular", "Netherland Folk Song, 1625","Arr. by Edward Kremser (1838-1914)"]
@@ -104,7 +105,7 @@ class MusicBoardApplication:
         self.state.set_main_menu(main_menu)
 
         # init the first staff
-        grand_staff = self.init_staffs(window_width, default_time_signature, default_key_signature) 
+        grand_staff = self.init_staffs(window_width, default_time_signature, default_key_signature, tempo, velocity) 
         # use first staff to create music score
         self.music_score = self.score_builder_director.build_score(grand_staff, score_title, score_credits, tempo) 
         self.state.set_music_score(self.music_score)
@@ -119,11 +120,11 @@ class MusicBoardApplication:
         while self.state.is_running:
             # Handle events
             self.event_handler.handle_events()
-
-            # Process music logic
-            #self.controller.process_note_placement()
-
-            # Render frame
+           
+            # Handle all polling
+            self.event_handler.handle_polling()
+            
+            # Render the screen/music score
             self.screen_renderer.render_frame()
 
             # Small delay to prevent excessive CPU usage
@@ -157,10 +158,10 @@ class MusicBoardApplication:
             self.logger.error(f"Error during cleanup: {e}")
 
     """ We initialize the app with only one grand staff."""
-    def init_staffs(self, window_width, time_signature, key_signature):        
+    def init_staffs(self, window_width, time_signature, key_signature, tempo, velocity):        
         # record this for subsequent operations
         grand_staff = self.staff_builder_director.build_grand_staff(window_width, StaffConfig, (TREBLE_CLEF, BASS_CLEF), 
-                                                                    time_signature, key_signature)
+                                                                    time_signature, key_signature, tempo, velocity)
         return grand_staff
     
     def menu_reset_action(self, menu_item:MenuItem):

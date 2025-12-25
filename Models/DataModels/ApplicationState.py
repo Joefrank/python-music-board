@@ -4,7 +4,7 @@ import copy
 from dataclasses import dataclass, field
 from typing import Optional, List, Tuple
 from pygame import Surface
-from Configs.screen_config import MouseEventType
+from Configs.screen_config import Color, MouseEventType
 from Configs.music_config import valid_note_durations, note_modifiers
 from Models import MusicScore, Note
 from Models.Chord import Chord
@@ -154,3 +154,8 @@ class ApplicationState:
         self.music_score = copy.deepcopy(self.music_score_backup) 
         if source_menu_item is not None:
             source_menu_item.deactivate_item()
+
+    def highlight_chord(self, chord: Chord, highlight: bool):
+        for note in chord.notes:
+            note.highlight(Color.PINK if highlight else Color.BLACK)
+        self.set_screen_refresh_status(True)

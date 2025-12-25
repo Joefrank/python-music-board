@@ -25,7 +25,8 @@ class StaffBuilderDirector:
         return staff_with, Position(all_staves_x_offset, staff_original_y_offset)
 
     def build_staff(self, clef, time_signature, key_signature, staff_original_position, staff_vertical_padding,
-                    staff_width, interval_thickness, line_thickness, staff_spacing, staff_no_lines, staff_no_intervals):
+                    staff_width, interval_thickness, line_thickness, staff_spacing, staff_no_lines, 
+                    staff_no_intervals, tempo, velocity):
         self.interval_thickness = interval_thickness
         self.staff_offset_margins_y = staff_vertical_padding
         self.line_thickness = line_thickness
@@ -37,7 +38,8 @@ class StaffBuilderDirector:
                     self.interval_thickness + self.line_thickness)
         possible_staff_padding = possible_no_oftop_lines_and_intervals * (self.interval_thickness + self.line_thickness)
         # Initialize the staff
-        self.staff_builder.init_staff(clef, time_signature, key_signature, staff_vertical_padding, staff_original_position, staff_width)
+        self.staff_builder.init_staff(clef, time_signature, key_signature, staff_vertical_padding, staff_original_position, 
+                                      staff_width, tempo, velocity)
         # Build music notes for staff and padding areas
         staff_note_items = self.staff_note_builder.build_staff_notes(clef, key_signature, possible_no_oftop_lines_and_intervals)
 
@@ -82,7 +84,7 @@ class StaffBuilderDirector:
         current_staff.set_notes_boundaries() 
         return current_staff
     
-    def build_grand_staff(self, window_width, StaffConfig, clef_tuple, time_signature, key_signature):
+    def build_grand_staff(self, window_width, StaffConfig, clef_tuple, time_signature, key_signature, tempo, velocity):
         # work out first staff position and width
         staff_with, staff_original_position = self.calculate_first_staff_position(window_width,
                                                                                       StaffConfig.STAFF_WIDTH_PERCENT,
@@ -97,7 +99,9 @@ class StaffBuilderDirector:
                                                            StaffConfig.STAFF_LINE_THICKNESS,
                                                            StaffConfig.STAFF_SPACING,
                                                            StaffConfig.STAFF_NO_LINES,
-                                                           StaffConfig.STAFF_NO_INTERVALS)
+                                                           StaffConfig.STAFF_NO_INTERVALS,
+                                                           tempo, 
+                                                           velocity)
         
         line_with_highest_y = max(treble_staff.virtual_lines, key=lambda line: line.start_position.y)
         staff_original_position = Position(staff_original_position.x, line_with_highest_y.start_position.y + StaffConfig.STAFF_SPACING)
@@ -109,7 +113,9 @@ class StaffBuilderDirector:
                                                            StaffConfig.STAFF_LINE_THICKNESS,
                                                            StaffConfig.STAFF_SPACING,
                                                            StaffConfig.STAFF_NO_LINES,
-                                                           StaffConfig.STAFF_NO_INTERVALS)
+                                                           StaffConfig.STAFF_NO_INTERVALS,
+                                                           tempo, 
+                                                           velocity)
         
         bottom_virtual_line = max(bass_staff.virtual_lines, key=lambda line: line.end_position.y)
         grand_staff = GrandStaff([treble_staff, bass_staff], original_position, bottom_virtual_line.end_position)

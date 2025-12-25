@@ -6,7 +6,7 @@ MODULATION_SHARP = "MODULATION_SHARP"
 MODULATION_FLAT = "MODULATION_FLAT"
 TREBLE_CLEF = "TREBLE_CLEF"
 BASS_CLEF = "BASS_CLEF"
-
+TICKS_PER_BEAT = 480
 
 musical_rests = [
     {"name": "Whole rest", "no_of_beats": 4, "font_code": "\uE4E3"},

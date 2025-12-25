@@ -29,7 +29,7 @@ class ScoreNavigator:
         
     def activate(self, music_score, menu_item:MenuItem):       
        self.music_score = music_score 
-       self.get_next_staff_for_navigation();
+       self.get_next_staff_for_navigation()
        self.start_position, self.end_position = self.current_staff.get_initial_navigator_line()
        self.current_line = StraightLine(self.start_position, self.end_position, thickness=2)
        self.state = ScoreNavigatorStatus.RUNNING 
@@ -100,7 +100,6 @@ class ScoreNavigator:
         for note in self.notes_to_play:
             if note.position.x == position.x:
                 note_key_code = StaffUtils.get_key_code_from_keyid(note.key_id)
-                #self.sound_player.play_note(note_key_code, note.duration[4])
                 self.sound_player.add_note_to_queue(note_key_code, note.duration[4])
 
 
