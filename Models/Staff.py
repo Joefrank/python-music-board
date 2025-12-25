@@ -1,5 +1,4 @@
 from Models import Chord
-from Models.Note import Note
 from Models.Position import Position
 
 class Staff: 

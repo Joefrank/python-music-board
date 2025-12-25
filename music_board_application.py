@@ -173,6 +173,8 @@ class MusicBoardApplication:
     def menu_save_score(self, menu_item:MenuItem):
         # check that there are no active menu otherwise alert.
         print('saving score')
+        score_details = self.state.music_score.save_details()
+        print(f'File saved to path:{score_details}')
         menu_item.deactivate_item()
    
     def menu_show_tooltip(self, menu_item:MenuItem):
