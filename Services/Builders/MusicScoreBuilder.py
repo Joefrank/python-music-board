@@ -13,12 +13,12 @@ class MusicScoreBuilder:
         self.highest_credit_y_offset = None 
 
     """This initializes the score with top staff"""
-    def init_score(self, initial_staff, score_title, score_credits):
+    def init_score(self, initial_staff, score_title, score_credits, tempo=80):
         if isinstance(initial_staff, GrandStaff):
             self.top_staff = initial_staff.staves[0]
         else: # normal staff            
             self.top_staff = initial_staff
-        self.music_score = MusicScore(self.top_staff.top_position, self.top_staff.get_width(), score_title, score_credits)
+        self.music_score = MusicScore(self.top_staff.top_position, self.top_staff.get_width(), score_title, score_credits, tempo)
         self.music_score.add_staff(initial_staff)
         
         return self

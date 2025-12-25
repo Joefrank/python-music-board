@@ -21,6 +21,7 @@ class Note:
         self.order:int = order
         self.extended:bool = extended
         self.staccato:bool = None
+        self.velocity:int = 64
         self.key:str = key
         self.key_id:str = key_id
         self.key_value:int = StaffUtils.get_key_code_from_keyid(key_id)
@@ -78,6 +79,12 @@ class Note:
             rest_duration = (duration - exact_duration) if duration > NoteDurationInTicks.QUARTER else 0
               
         return exact_duration, rest_duration
+    
+    def get_velocity(self):
+        return self.velocity
+    
+    def set_velocity(self, velocity):
+        self.velocity = velocity
     
     def __str__(self):
         return f"Note {self.key_id} - Position:{self.position} - Order: {self.order} - Extended:{self.extended}" + \

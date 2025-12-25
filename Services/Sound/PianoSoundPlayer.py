@@ -10,10 +10,10 @@ from Models.Staff import Staff
 
 class SoundPlayer:
     keys_played = []
-    BPM = 120 # Beats Per Minute: Tempo setting
-    TICKS_PER_BEAT = 480
-    SECONDS_PER_BEAT = 60 / BPM
-    SECONDS_PER_TICK = SECONDS_PER_BEAT / TICKS_PER_BEAT
+    # BPM = 120 # Beats Per Minute: Tempo setting
+    # TICKS_PER_BEAT = 480
+    # SECONDS_PER_BEAT = 60 / BPM
+    # SECONDS_PER_TICK = SECONDS_PER_BEAT / TICKS_PER_BEAT
     
     def __init__(self):
         self.outport = mido.open_output()
@@ -79,7 +79,7 @@ class SoundPlayer:
             duration = note[1] * self.SECONDS_PER_TICK  
             print(f"Playing chord note: {note[0]} - Duration (s): {duration}")          
             # Play note
-            self.outport.send(mido.Message('note_on', note=note[0], velocity=90))            
+            self.outport.send(mido.Message('note_on', note=note[0], velocity=note[2]))            
         
         time.sleep(duration)
 

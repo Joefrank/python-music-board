@@ -40,7 +40,7 @@ class MusicBoardApplication:
     def initialize(self) -> None:
         """ Initializes everything to do with music-board application """
        #try:
-        default_time_signature, default_key_signature, score_title = "3x4", "F", "Praise to the Lord"
+        default_time_signature, default_key_signature, score_title, tempo = "3x4", "F", "Praise to the Lord", 90
         score_credits = [
             ["Anonymous, 1625", "Tr. by Theodore Baker, 1917 (1851-1934)"],
             ["KREMSER Irregular", "Netherland Folk Song, 1625","Arr. by Edward Kremser (1838-1914)"]
@@ -106,7 +106,7 @@ class MusicBoardApplication:
         # init the first staff
         grand_staff = self.init_staffs(window_width, default_time_signature, default_key_signature) 
         # use first staff to create music score
-        self.music_score = self.score_builder_director.build_score(grand_staff, score_title, score_credits) 
+        self.music_score = self.score_builder_director.build_score(grand_staff, score_title, score_credits, tempo) 
         self.state.set_music_score(self.music_score)
         
 

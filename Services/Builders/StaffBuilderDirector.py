@@ -115,11 +115,11 @@ class StaffBuilderDirector:
         grand_staff = GrandStaff([treble_staff, bass_staff], original_position, bottom_virtual_line.end_position)
         return grand_staff
     
-    def build_music_Score(self, grand_staff, score_title, score_credits):
-        top_staff = grand_staff.staves[0]
-        staff_width = top_staff.top_line.end_position.x - top_staff.top_line.start_position.x
-        music_score = MusicScore(top_staff.top_position, staff_width, score_title, score_credits)
-        music_score.build_credits();
-        music_score.add_staff(grand_staff)
+    # def build_music_Score(self, grand_staff, score_title, score_credits):
+    #     top_staff = grand_staff.staves[0]
+    #     staff_width = top_staff.top_line.end_position.x - top_staff.top_line.start_position.x
+    #     music_score = MusicScore(top_staff.top_position, staff_width, score_title, score_credits)
+    #     music_score.build_credits();
+    #     music_score.add_staff(grand_staff)
 
-        return music_score
+    #     return music_score
