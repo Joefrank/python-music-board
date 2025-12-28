@@ -157,5 +157,13 @@ class ApplicationState:
 
     def highlight_chord(self, chord: Chord, highlight: bool):
         for note in chord.notes:
-            note.highlight(Color.PINK if highlight else Color.BLACK)
+            if not highlight and not note.is_in_play():
+                color = Color.BLACK
+            else:
+                color = Color.PINK
+            note.highlight(color)
         self.set_screen_refresh_status(True)
+
+    def clear_pending_notes(self, notes: list[Note]):
+        for note in notes:
+            note.highlight(Color.BLACK)

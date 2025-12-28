@@ -8,7 +8,9 @@ from Models.Chord import Chord
 from Models.GrandStaff import GrandStaff
 from Models.MusicScore import MusicScore
 from Models.Staff import Staff
+from Services.Sound.PianoNote import PianoNote
 from Services.Utils.MusicUtils import MusicUtils
+from Models.Note import Note
 
 class SoundPlayer:
     keys_played = []
@@ -19,12 +21,19 @@ class SoundPlayer:
         self.chord_queue = queue.Queue()
         self.play_lock = threading.Lock()
         self.feedback_queue = queue.Queue()
+        self.pending_chord_queue = queue.Queue()
 
         self.midi_thread = threading.Thread(
             target=self.midi_worker,
             daemon=True
         )
         self.midi_thread.start()
+
+        self.pending_chord_thread = threading.Thread(
+            target=self.terminate_pending_notes,
+            daemon=True
+        )
+        self.pending_chord_thread.start()
 
     def play_key(self, key_code):
         self.keys_played.append(key_code)
@@ -69,19 +78,29 @@ class SoundPlayer:
             self.play_note(note_key_code, duration_ticks, velocity, tempo)
 
     def midi_worker(self, port_name='Microsoft GS Wavetable Synth'):
-         try:              
+         try:     
+              pending_notes = None         
               while True:
+                # if self.chord_queue.qsize() == 0:
+                #     continue
                 chord = self.chord_queue.get()  # blocks until a chord is available   
-                with self.play_lock:  
-                    self.feedback_queue.put((SoundPlayerEventConstants.CHORD_START, chord))           
-                    self.play_chord(chord)  
-                    self.feedback_queue.put((SoundPlayerEventConstants.CHORD_END, chord))                 
-                self.chord_queue.task_done()             
 
-         except IOError:
-             print("Could not play chord:")
+                with self.play_lock:  
+                    self.feedback_queue.put((SoundPlayerEventConstants.CHORD_START, chord))  # Notifies UI thread of update         
+                    pending_notes = self.play_chord(chord)  
+                    if pending_notes is not None:
+                        self.add_pending_notes_to_queue(pending_notes)
+                    self.feedback_queue.put((SoundPlayerEventConstants.CHORD_END, chord))                 
+                self.chord_queue.task_done()  
+
+                if self.chord_queue.qsize() == 0:
+                    self.feedback_queue.put((SoundPlayerEventConstants.BATCH_END, chord))
+                    print(f"Batch completed - {self.chord_queue.qsize()}")           
+
+         except queue.Empty:
+             print("Queue is empty, waiting for new chords...")
              print(mido.get_output_names())
-             return
+             
          finally: # clean up
             if self.outport:
                 # Safety: turn off any stuck notes
@@ -91,29 +110,98 @@ class SoundPlayer:
                 self.outport.close()
 
     def play_chord(self, chord: Chord):
-        note_details = chord.get_playable_notes()
+        chord.set_notes_in_play()
+        note_details = chord.get_playable_notes()        
+        notes = self.group_notes_by_duration(note_details)
+        smallest_duration = notes[0].duration_in_seconds
+
         #print("------------------------------------starting --------------------")
-        for note in note_details:                
-            duration = 1 #MusicUtils.get_note_duration(note[1], note[3])
-            print(f"Playing chord note: {note[0]} - Duration (s): {duration}")          
-            # Play note
-            self.outport.send(mido.Message('note_on', note=note[0], velocity=note[2]))            
+        for note in notes:
+            if note.duration_in_seconds < smallest_duration: # find smallest duration
+                smallest_duration = note.duration_in_seconds
+
+            self.outport.send(mido.Message('note_on', note=note.key_code, velocity=note.velocity))            
         
-        time.sleep(duration)
+        time.sleep(smallest_duration)
 
         #print("------------------------------------TErminating --------------------")
-        for note in note_details:
-            self.outport.send(mido.Message('note_off', note=note[0]))
+        for note in notes:
+            if note.duration_in_seconds == smallest_duration: # only stop notes that have reached their duration
+                self.outport.send(mido.Message('note_off', note=note.key_code))
+                note.note.set_off_play()
+                notes.remove(note)  # remove note from list as it has finished playing
+        
+        # reduce remaining notes duration
+        for note in notes:
+            note.duration_in_seconds -= smallest_duration
 
-    def start_processing_queue(self):
-        print("------------------------------------ processing queue --------------------")
-        # Start MIDI thread
-        #threading.Thread(target=self.midi_worker, daemon=True).start()
+        # pending notes will be returned and further processed
+        return notes if len(notes) > 0 else None
+    
+    def add_pending_notes_to_queue(self, notes: list[PianoNote]):
+        self.pending_chord_queue.put(notes)
 
+    def terminate_pending_notes(self): # type: ignore
+         try:     
+                     
+              while True:                
+                pending_notes = self.pending_chord_queue.get()  # blocks until a chord is available   
+                notes_to_terminate = []
+
+                # get the next smallest duration
+                while len(pending_notes) > 0:
+                    smallest_note_in_duration = min(pending_notes, key=lambda note: note.duration_in_seconds)
+                    time.sleep(smallest_note_in_duration.duration_in_seconds)
+                    for note in pending_notes:
+                        if note.duration_in_seconds == smallest_note_in_duration.duration_in_seconds:
+                            self.outport.send(mido.Message('note_off', note=note.key_code))
+                            note.note.set_off_play()
+                            notes_to_terminate.append(note.note)
+                            pending_notes.remove(note)
+                            print(f"pending note terminates: {note.key_code}")
+                           
+                    self.feedback_queue.put((SoundPlayerEventConstants.PENDING_CHORD_END, notes_to_terminate))
+                    
+                    # for any remaining notes, reduce their duration
+                    for note in pending_notes:
+                        note.duration_in_seconds -= smallest_note_in_duration.duration_in_seconds                   
+                                    
+                self.pending_chord_queue.task_done()
+
+         except queue.Empty:
+             print("Queue is empty, waiting for new chords...")
+             print(mido.get_output_names())
+
+
+    def group_notes_by_duration(self, notes: list[tuple[int, int, int, int, Note]]) -> []: # type: ignore
+
+        piano_chords = []
+        duration_dict = []       
+        chord_order = 1
+        
+        for piano_note in piano_chords:
+            piano_note.sort_out_duration(duration_dict)
+
+        for note in notes:
+            duration = MusicUtils.get_note_duration(note[1], note[3])
+            piano_note = PianoNote(note[0], duration, note[2], chord_order, note[4])
+            piano_chords.append(piano_note)
+            if duration not in duration_dict:
+                duration_dict.append(duration)            
+            chord_order += 1
+        
+       
+        return piano_chords
+   
+   
     def add_note_to_queue(self, note, length):
         self.note_queue.put((note, length))
 
     def add_chord_to_queue(self, chord: Chord):       
         self.chord_queue.put(chord)
+
+    def add_chords_to_queue(self, chords: list[Chord]):       
+        for chord in chords:
+            self.chord_queue.put(chord)
 
    

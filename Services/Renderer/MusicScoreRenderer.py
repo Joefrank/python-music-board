@@ -23,12 +23,7 @@ class MusicScoreRenderer(BaseRenderer):
         # render credit and title
         self.render_score_credit(screen, music_score)
         self.render_score_title(music_score.title, music_score.title_position, music_score.score_width, screen)
-        # check if there is a score navigator
-        if self.state.score_navigator.is_live():
-            line = self.state.score_navigator.current_line
-            self.draw_line(line, color=Color.RED, thickness=3)
-            if self.state.score_navigator.is_running():
-                self.state.score_navigator.move_next()
+      
     
     def render_score_credit(self, screen, score):
         score_credit = score.credits        

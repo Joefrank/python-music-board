@@ -31,6 +31,7 @@ class Note:
         self.connected_note:Note = None
         self.stem_inverted = False
         self.color = None
+        self.is_being_played = False
 
     """
         staff_item: line/interval containing this note
@@ -96,6 +97,15 @@ class Note:
     
     def highlight(self, color):
         self.color = color
+    
+    def is_in_play(self):
+        return self.is_being_played
+    
+    def set_in_play(self):
+        self.is_being_played = True
+
+    def set_off_play(self):
+        self.is_being_played = False
         
     def __str__(self):
         return f"Note {self.key_id} - Position:{self.position} - Order: {self.order} - Extended:{self.extended}" + \

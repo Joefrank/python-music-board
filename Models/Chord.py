@@ -28,16 +28,20 @@ class Chord:
         # logic to reassess chord name based on notes        
         pass
 
-    def get_playable_notes(self) -> list[(int, int, int, int)]:
+    def get_playable_notes(self) -> list[(int, int, int, int, Note)]:
         notes_to_play = []
         for note in self.notes:
             note_duration, rest_duration = note.get_exact_duration()
-            notes_to_play.append((note.key_value, note_duration, note.get_velocity(), note.get_tempo()))
+            notes_to_play.append((note.key_value, note_duration, note.get_velocity(), note.get_tempo(), note))
             if rest_duration > 0:
-                notes_to_play.append((0, rest_duration, 0, note.get_tempo()))  # 0 key_value for rest
+                notes_to_play.append((0, rest_duration, 0, note.get_tempo(), note))  # 0 key_value for rest
 
         return notes_to_play
     
+    def set_notes_in_play(self):
+        for note in self.notes:
+            note.set_in_play()
+
     def __str__(self):
         return f"Chord: {self.name} - Notes: " + " | ".join(str(note) for note in self.notes)
 

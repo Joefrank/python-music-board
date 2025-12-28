@@ -1,0 +1,21 @@
+
+TODO:
+
+
+*** Chords that have notes with different durations need to be followed accordingly.
+** Link stems in same chords that are on the same staff (if chords are far apart).
+** use only one stem extension for notes whose duration is less than a quarter 
+    (see screen item no.5 2 quavers linked with double extended stem)
+* Stem direction will depend on clef and notes position for chord. (sync score)
+    Stem will go opposite direction from note that is furthest away from middle line.
+    Stem will be positioned on left if points down and right if up.
+** Add bars automatically based on time signature. (research on this).
+* Add sync option to arrange chord/note positions based on bars on staff.
+** Add func to create new staff as needed.
+* Add functionality for beamed notes
+* Implement Save functionality.
+* Implement Load functionality.
+** Add rest as part of the score and note playing
+
+      
+
