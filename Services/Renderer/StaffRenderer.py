@@ -4,7 +4,8 @@ from datetime import datetime
 from Models import GrandStaff, Interval, MusicScore, Note
 from Models.Line import Line
 from Models.Position import Position
-from Configs.music_config import NoteDurationInTicks, supported_clef_settings, supported_time_signatures, supported_modulations, lowest_note_code
+from Configs.music_config import NoteDurationInTicks, supported_clef_settings, supported_time_signatures, \
+    supported_modulations, lowest_note_code
 from Configs.screen_config import GenericConfig, StaffConfig, staff_generic_settings, Color
 from Models.Staff import Staff
 from Services.Renderer.BaseRenderer import BaseRenderer
@@ -54,6 +55,7 @@ class StaffRenderer(BaseRenderer):
     def render_staff_items(self, staff):
         self.render_staff_intervals(staff)
         self.render_staff_lines(staff)
+        self.render_staff_bars(staff)
 
     """ We don't normally display intervals but lines show gaps which are intervals. 
         But we do display the contained elements (musical items) on screen."""  
@@ -72,6 +74,11 @@ class StaffRenderer(BaseRenderer):
            
         for line in staff.virtual_lines:
             self.draw_staff_item_collaterals(line, staff, nearest_staff=staff) 
+
+    """ Displays staff bars """
+    def render_staff_bars(self, staff):
+        for bar in staff.bars:
+            self.draw_line(bar.line)   
 
     """
         Draws any items in ApplicationState that collide with the line

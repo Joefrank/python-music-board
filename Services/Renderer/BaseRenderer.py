@@ -54,7 +54,8 @@ class BaseRenderer:
                          (end_point.x, end_point.y), thickness)
         
     def draw_line(self, line, color=(0, 0, 0), thickness=1):
-        self.draw_line_from_point(line.start_position, line.end_position, color, thickness) 
+        self.draw_line_from_point(line.start_position, line.end_position, color, 
+                                  thickness if line.thickness is None else line.thickness) 
 
     """ 
         note_type: duration of note (1: note, 2: semi-brev , 4:quaver), 

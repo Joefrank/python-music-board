@@ -19,7 +19,7 @@ musical_rests = [
 note_modifiers = ['s','x','b','d','c','i','l','S','X','B','D','C','I','L']
 
 @dataclass
-class VelicityLevels:
+class VelocityLevels:
     PPP: int = 20 # Pianississimo
     PP: int = 40 # Pianissimo
     P: int = 60 # Piano

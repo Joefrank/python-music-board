@@ -1,7 +1,11 @@
-from Configs.music_config import VelicityLevels
+from Configs.music_config import VelocityLevels
+from Configs.screen_config import StaffConfig
 from Models import Chord
 from Models import Note
+from Models.DataModels.StaffBar import StaffBar
+from Models.StraightLine import StraightLine
 from Models.Position import Position
+from Configs.music_config import supported_time_signatures
 
 class Staff: 
    
@@ -34,7 +38,7 @@ class Staff:
         self.time_signature = time_signature
         self.key_signature = key_signature
         self.velocity:int = velocity
-        self.tempo:int = tempo
+        self.tempo:int = tempo        
       
     def set_notes_boundaries(self):
         self.notes_left_offset = self.top_line.line_collateral_boundaries.left_boundary
@@ -139,6 +143,28 @@ class Staff:
 
         return chords  
     
+    """ This generates bars for the current staff based on time signature.
+        The width of bars also should be based on no of items (notes or rests) in each bar.
+    """
+    def generate_bars(self):
+        (numerator, denominator) = supported_time_signatures[self.time_signature]["fraction"]
+        notes_space = self.notes_right_offset - self.notes_left_offset
+        # if there are no notes, just add bars evenly. we will have a sync function to re-arrange based on notes.
+        factor = 2 if denominator != 4 else 1 # we want bigger bars and less if denominator is not 4
+        bar_width = (numerator * StaffConfig.STAFF_NOTE_SPACE * factor)
+        no_of_bars = int(notes_space // bar_width)
+        # create and register all bars
+        previous_bar = None
+        #x_offset = self.notes_left_offset
+        for bar_index in range(1, no_of_bars + 1):
+            x_offset = self.notes_left_offset + (bar_index * bar_width)
+            bar_line = StraightLine(Position(x_offset, self.notes_top_offset), 
+                                    Position(x_offset, self.notes_bottom_offset), StaffConfig.STAFF_BAR_THICKNESS)
+            bar = StaffBar(previous_bar, None, bar_line)
+            self.bars.append(bar)
+            if previous_bar is not None:
+                previous_bar.set_next(bar)
+
     def __str__(self):
         lines_str = "-> ".join(str(line) for line in self.lines)
         intervals_str = "-> ".join(str(interval) for interval in self.intervals)

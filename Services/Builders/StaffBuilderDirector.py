@@ -82,6 +82,7 @@ class StaffBuilderDirector:
                                                , staff_left_x_offset, StaffConfig.STAFF_RIGHT_PADDING)
         current_staff = self.staff_builder.build_staff()
         current_staff.set_notes_boundaries() 
+        current_staff.generate_bars()
         return current_staff
     
     def build_grand_staff(self, window_width, StaffConfig, clef_tuple, time_signature, key_signature, tempo, velocity):

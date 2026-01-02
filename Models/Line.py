@@ -1,4 +1,4 @@
-from Models.Menu.StraightLine import StraightLine
+from Models.StraightLine import StraightLine
 
 
 class Line(StraightLine):    

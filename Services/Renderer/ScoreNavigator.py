@@ -4,7 +4,7 @@ from Configs.screen_config import Color, ScoreNavigatorStatus
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.GrandStaff import GrandStaff
 from Models.Menu.MenuItem import MenuItem
-from Models.Menu.StraightLine import StraightLine
+from Models.StraightLine import StraightLine
 from Models.MusicScore import MusicScore
 from Models.Position import Position
 from Models.Staff import Staff

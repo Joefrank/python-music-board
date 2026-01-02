@@ -2,7 +2,7 @@ import logging
 import pygame
 
 from Configs import screen_config
-from Configs.music_config import BASS_CLEF, TREBLE_CLEF, VelicityLevels
+from Configs.music_config import BASS_CLEF, TREBLE_CLEF, VelocityLevels
 from Models import MusicScore
 from Models.DataModels.ApplicationState import ApplicationState
 from Models.EventHandler import EventHandler
@@ -41,7 +41,7 @@ class MusicBoardApplication:
         """ Initializes everything to do with music-board application """
        #try:
         default_time_signature, default_key_signature, score_title, tempo, velocity =\
-              "3x4", "F", "Praise to the Lord", 90, VelicityLevels.MF
+              "3x4", "F", "Praise to the Lord", 90, VelocityLevels.MF
         score_credits = [
             ["Anonymous, 1625", "Tr. by Theodore Baker, 1917 (1851-1934)"],
             ["KREMSER Irregular", "Netherland Folk Song, 1625","Arr. by Edward Kremser (1838-1914)"]
