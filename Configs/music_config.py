@@ -16,7 +16,7 @@ musical_rests = [
     {"name": "Sixteenth rest", "no_of_beats": 0.25, "font_code": "\uE4E7"}
 ]
 
-note_modifiers = ['s','x','b','d','c','i','l','S','X','B','D','C','I','L']
+note_modifiers = ['s','x','b','d','c','i','l']
 
 @dataclass
 class VelocityLevels:
@@ -33,13 +33,13 @@ class VelocityLevels:
 @dataclass
 class NoteModifierDetails:
     # format is [list] of keys, no of items affected by modifier
-    DELETE = (['D','d'], 1) # delete single note when this key pressed and click on note
-    EXTEND = (['X', 'x'], 1) # extend new/existing note by half its duration on this key press + click 
-    STACCATO = (['S','s'], 1) # make new/existing note staccato on key press + click
-    INVERT_STEM = (['I', 'i'], 1) # invert stem of new/existing note on key press + click
-    BEAM = (['B', 'b'], 2) # beem this note to previous if it exist.
-    CONNECT = (['C', 'c'], 2) # connect this note to previous if one exist
-    LINK = (['L','l'], 'x') # link notes to create a chord between staves.
+    DELETE = ('d', 1) # delete single note when this key pressed and click on note
+    EXTEND = ('x', 1) # extend new/existing note by half its duration on this key press + click 
+    STACCATO = ('s', 1) # make new/existing note staccato on key press + click
+    INVERT_STEM = ('i', 1) # invert stem of new/existing note on key press + click
+    BEAM = ('b', 2) # beem this note to previous if it exist.
+    CONNECT = ('c', 2) # connect this note to previous if one exist
+    LINK = ('l', 'x') # link notes to create a chord between staves.
 
 @dataclass
 class NoteDurationInTicks:

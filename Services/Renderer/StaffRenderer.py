@@ -185,11 +185,7 @@ class StaffRenderer(BaseRenderer):
          note_extended = False     
          new_note = Note(staff_item, note_duration, note_position, note_order, note_extended, staff_item.key,
                          staff_item.key_id, tempo, velocity)
-         # check if there is any note modifier
-         #note_modifier = self.state.get_registered_note_modifier()
-         #if note_modifier is not None:
-            # new_note.implement_modifier(note_modifier, None)
-
+        
          new_note.set_parent(staff_item)
          staff_item.add_note(new_note)  
          return new_note    

@@ -102,7 +102,7 @@ class EventHandler:
             self.state.set_screen_refresh_status(True)
         
     def _handle_key_down(self, event) -> None:
-        key_name = pygame.key.name(event.key).upper()
+        key_name = pygame.key.name(event.key).lower()
         self.state.register_key_down(key_name)
 
     def _handle_key_up(self) -> None:

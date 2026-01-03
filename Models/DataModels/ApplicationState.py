@@ -147,6 +147,28 @@ class ApplicationState:
         self.mouse_hover.notify()
 
     def register_mouse_click_event(self, new_mouse_position):
+        if (new_mouse_position is None or self.note_modifier is None):
+            return
+         
+        nearest_staff_item = self.music_score.find_nearest_staff_item(new_mouse_position)
+        if nearest_staff_item is None:
+            return
+
+        # add note to this staff item
+        nearest_staff_item.add_note_at_position(new_mouse_position, self.note_duration, self.sound_player.default_velocity)
+        
+        # new_note = self.render_note_at_position(mouse_click_position, staff_item, staff.tempo, staff.velocity)            
+        # #self.draw_note(new_note.duration, staff_item.key_id, 40, 30, new_note.position, color=Color.RED)
+        # self.render_note(new_note, True, Color.RED, Color.GREY)
+        # self.state.set_last_added_note(new_note)
+        # note_key_code = StaffUtils.get_key_code_from_keyid(new_note.key_id)
+        # note_duration, rest_duration = new_note.get_exact_duration()
+        # self.state.sound_player.play_note(note_key_code, note_duration, new_note.velocity, new_note.tempo)
+        # if rest_duration > 0:
+        #     self.state.sound_player.play_note(0, rest_duration, 0, new_note.tempo)  # 0 key_value for rest
+        # self.state.mouse_click.reset_current_position()
+
+        # *** 
         self.mouse_click.set_current_position(new_mouse_position)
         self.mouse_click.notify()
             

@@ -40,28 +40,29 @@ class Note:
         self.staff_item = staff_item
 
     def implement_unary_modifier(self, modifier):
-        modifier_keys = modifier[0]
-        if not any(item in modifier_keys for item in note_modifiers):
+        modifier_key = modifier[0].lower()
+
+        if not modifier_key in note_modifiers:
             return
 
-        modifier_key = modifier_keys[0]
         match modifier_key:
-            case 's' | 'S':                 
+            case 's':                 
                  self.staccato = True
-            case 'x' | 'X':
+            case 'x':
                  self.extended = True            
-            case 'd' | 'D':
+            case 'd':
                  self.staff_item.delete_note(self)           
-            case 'i' | 'I':
+            case 'i':
                  self.stem_inverted = not self.stem_inverted
 
     def implement_binary_modifier(self, modifier, linked_note):
         if modifier not in note_modifiers:
             return
+
         match modifier:           
-            case 'b' | 'B':
+            case 'b':
                  self.beam_with = linked_note          
-            case 'c' | 'C':
+            case 'c':
                  self.connected_note = linked_note 
 
     def is_near_position(self, position: Position) -> bool:
