@@ -11,7 +11,8 @@ class Chord:
     def add_note(self, note: Note):
         note.position.moveHorizontallyTo(self.x_offset)
         self.notes.append(note)
-        self.reassess_name()
+        print(f" Note index: {note.get_parent().staff_index} - {note}")
+        self.reassess_chord_name()
 
     def set_notes(self, notes):        
         self.notes = notes
@@ -21,10 +22,10 @@ class Chord:
         if chord.x_offset != self.x_offset:
             return False
         self.notes.extend(chord.notes)
-        self.reassess_name()
+        self.reassess_chord_name()
         return True
         
-    def reassess_name(self):
+    def reassess_chord_name(self):
         # logic to reassess chord name based on notes        
         pass
 

@@ -39,6 +39,9 @@ class Note:
     def set_parent(self, staff_item):
         self.staff_item = staff_item
 
+    def get_parent(self):
+        return self.staff_item
+    
     def implement_unary_modifier(self, modifier):
         modifier_key = modifier[0].lower()
 

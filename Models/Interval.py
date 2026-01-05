@@ -1,14 +1,24 @@
-class Interval:
-  
-    def __init__(self, position_rect, key, key_id, is_virtual, vertical_positioning, staff_index, line_collateral_boundaries):
-        self.staff_index = staff_index
+from Models.DataModels.StaffItem import StaffItem
+from Models.Note import Note
+from Models.Position import Position
+
+class Interval(StaffItem):
+    def __init__(self, position_rect, 
+                 key, key_id, is_virtual, vertical_positioning, 
+                 staff_index, line_collateral_boundaries, velocity, tempo):
+
+        super().__init__(
+            staff_index=staff_index,
+            key=key,
+            key_id=key_id,
+            is_virtual=is_virtual,
+            vertical_positioning=vertical_positioning,
+            line_collateral_boundaries=line_collateral_boundaries,
+            velocity=velocity,
+            tempo=tempo
+        )
+
         self.position_rect = position_rect
-        self.key = key
-        self.key_id = key_id
-        self.is_virtual = is_virtual
-        self.notes = []
-        self.vertical_positioning = vertical_positioning
-        self.line_collateral_boundaries = line_collateral_boundaries
 
     def add_note(self, note):
         self.notes.append(note)
@@ -49,8 +59,21 @@ class Interval:
         return None
     
     def get_notes(self):
-        return self.notes
+        return self.notes    
+      
+    def add_note_at_position(self, position, duration) -> Note:
+        # Adjust position to be position of line 
+        y_offset =  ((self.position_rect.bottom_left.y - self.position_rect.top_left.y) // 2)
+        note_position = Position(position.x, self.position_rect.top_left.y + y_offset)        
+        new_note = Note(self, duration, note_position, self.get_next_note_index(), False, 
+                        self.key, self.key_id, self.tempo, self.velocity)        
+        new_note.set_parent(self)
+        self.add_note(new_note)  
+        return new_note
     
+    def set_staff_index(self, staff_index):
+        self.staff_index = staff_index   
+
     def __str__(self):
         return (f"\n{"Virtual " if self.is_virtual else ""}Interval #{self.staff_index} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Top-Left{self.position_rect.top_left} - Top-Right: {self.position_rect} "
                 f"- Bottom-Left: {self.position_rect.bottom_left} - Bottom-Right: {self.position_rect.bottom_right}"

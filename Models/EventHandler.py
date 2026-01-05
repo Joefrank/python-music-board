@@ -82,24 +82,8 @@ class EventHandler:
             return
         
         # check if there are modifiers, that will determine what to do with mouse click
-        note_modifier = self.state.get_registered_note_modifier()
-        click_position = Position(event.pos[0], event.pos[1])
-        self.state.register_mouse_click_event(click_position)
-        nearest_note = None
+        self.state.register_mouse_click_event(Position(event.pos[0], event.pos[1])) # TODO: modify everything after this cause click should be actioned in function
         
-        # if any modifier (key down) has been registered before click. unary modifier only in this case
-        if note_modifier is not None:
-            # check if there is any note near click and modify it           
-            nearest_note = self.state.check_click_around_note(click_position)
-            if nearest_note is not None:
-                self.state.effect_note_modifier(nearest_note, note_modifier)
-                # clear this to avoid creating new note because we changed the nearest_note
-                self.state.mouse_click.reset_current_position() 
-
-        # this will cause a new note to be added if no nearest note has been found.
-        if nearest_note is None:
-            self.state.mouse_click.set_current_position(click_position)
-            self.state.set_screen_refresh_status(True)
         
     def _handle_key_down(self, event) -> None:
         key_name = pygame.key.name(event.key).lower()

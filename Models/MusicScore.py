@@ -29,4 +29,12 @@ class MusicScore:
         for staff in self.staves_sequence:
             notes.extend(staff.get_notes())
         return sorted(notes, key=lambda note: note.position.x)
+    
+    def find_nearest_staff_item_to_position(self, position):        
+        for staff in self.staves_sequence:
+            nearest_item = staff.find_nearest_item_to_position(position)
+            if nearest_item is not None:
+                return nearest_item
+          
+        return None
   

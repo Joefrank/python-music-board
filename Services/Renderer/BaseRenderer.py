@@ -38,7 +38,12 @@ class BaseRenderer:
     """
     def draw_text(self, screen, text, position, font_size, container_width=100, font_color=(0, 0, 0), text_alignment="LEFT"):
         font = pygame.font.SysFont(None, font_size)  # None = default font, 48 = font size
-        text_renderer = font.render(text, True, font_color)
+        
+        try:
+            text_renderer = font.render(text, True, font_color)
+        except Exception as e:
+            print(f"Error rendering text '{text}': {e}")
+            print (f"Drawing text '{text}' at position {position} with alignment {text_alignment}")
         if text_alignment == "RIGHT":
             text_rect = text_renderer.get_rect()
             text_rect.topright = (position.x, position.y) # 20 px for padding

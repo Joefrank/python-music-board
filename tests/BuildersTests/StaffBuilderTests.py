@@ -188,6 +188,7 @@ class TestStaffBuilder(unittest.TestCase):
         staff_builder.init_staff("TREBLE_CLEF", "6x8", "G", staff_offset_margins_y, staff_left_top, 1100)
         staff_builder.build_virtual_intervals(interval_thickness, line_thickness, piano_ley_details, start_position,
                                               VERTICAL_POSITION_TOP, staff_offset_margins_y)
+                                              
         intervals = staff_builder.intervals
 
         ## Assert

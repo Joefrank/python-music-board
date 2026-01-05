@@ -73,13 +73,13 @@ class StaffBuilderDirector:
         original_position = Position(staff_bottom_line.start_position.x, staff_bottom_line.start_position.y + 1) # + 1 because we want to start at the next pixel after the bottom line thickness
         
         self.staff_builder.build_virtual_intervals(self.interval_thickness, self.line_thickness, bottom_notes.interval_notes, 
-                                                   original_position, VERTICAL_POSITION_BOTTOM, possible_no_oftop_lines_and_intervals
-                                                   , staff_left_x_offset, StaffConfig.STAFF_RIGHT_PADDING)
+                                                   original_position, VERTICAL_POSITION_BOTTOM, possible_no_oftop_lines_and_intervals,
+                                                     staff_left_x_offset, StaffConfig.STAFF_RIGHT_PADDING)
         original_position = Position(staff_bottom_line.start_position.x, staff_bottom_line.start_position.y + self.interval_thickness + 1)
        # print(f"original_position VL-bottom: {original_position.x, original_position.y}")
         self.staff_builder.build_virtual_lines(self.interval_thickness, self.line_thickness, bottom_notes.line_notes, original_position,
-                                               VERTICAL_POSITION_BOTTOM, possible_staff_padding, possible_no_oftop_lines_and_intervals
-                                               , staff_left_x_offset, StaffConfig.STAFF_RIGHT_PADDING)
+                                               VERTICAL_POSITION_BOTTOM, possible_staff_padding, possible_no_oftop_lines_and_intervals,
+                                               staff_left_x_offset, StaffConfig.STAFF_RIGHT_PADDING)
         current_staff = self.staff_builder.build_staff()
         current_staff.set_notes_boundaries() 
         current_staff.generate_bars()

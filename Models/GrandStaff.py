@@ -77,3 +77,11 @@ class GrandStaff:
         bottom_left = copy.deepcopy(bottom_staff_bottom)
         return (top_left, bottom_left)
     
+    def find_nearest_item_to_position(self, position):        
+        for staff in self.staves:
+            nearest_item = staff.find_nearest_item_to_position(position)
+            if nearest_item is not None:
+                return nearest_item
+          
+        return None
+    

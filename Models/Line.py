@@ -1,18 +1,27 @@
+from Models.DataModels.StaffItem import StaffItem
+from Models.Note import Note
+from Models.Position import Position
 from Models.StraightLine import StraightLine
+       
+class Line(StraightLine, StaffItem):
+    def __init__(self, 
+                 start_position, end_position, thickness, is_virtual, key, 
+                 key_id, vertical_positioning, staff_index, 
+                 line_collateral_boundaries, velocity, tempo):
 
-
-class Line(StraightLine):    
-
-    def __init__(self, start_position, end_position, thickness, is_virtual, key, 
-                 key_id, vertical_positioning, staff_index, line_collateral_boundaries):
-        super().__init__(start_position, end_position, thickness) 
-        self.staff_index = staff_index
-        self.key = key
-        self.key_id = key_id
-        self.is_virtual = is_virtual
-        self.vertical_positioning = vertical_positioning
-        self.line_collateral_boundaries = line_collateral_boundaries
-        self.notes = []
+        super().__init__(
+            start_position=start_position,
+            end_position=end_position,
+            thickness=thickness,
+            staff_index=staff_index,
+            key=key,
+            key_id=key_id,
+            is_virtual=is_virtual,
+            vertical_positioning=vertical_positioning,
+            line_collateral_boundaries=line_collateral_boundaries,
+            velocity=velocity,
+            tempo=tempo
+        )
 
     def add_note(self, note):
         self.notes.append(note)
@@ -49,7 +58,19 @@ class Line(StraightLine):
         return self.notes
     
     def get_notes_in_positional_order(self):
-        return sorted(self.notes, key=lambda note: note.position.x)
+        return sorted(self.notes, key=lambda note: note.position.x)          
     
+    def add_note_at_position(self, position, duration) -> Note:
+        # Adjust position to be position of line        
+        note_position = Position(position.x, self.start_position.y) 
+        new_note = Note(self, duration, note_position, self.get_next_note_index(), False, 
+                        self.key, self.key_id, self.tempo, self.velocity)        
+        new_note.set_parent(self)
+        self.add_note(new_note)  
+        return new_note    
+    
+    def set_staff_index(self, staff_index):
+        self.staff_index = staff_index       
+
     def __str__(self):
         return f"\n{"Virtual " if self.is_virtual else ""}Line #{self.staff_index} - Thickness: {self.thickness} - Key id: {self.key_id} - Vertical positioning: {self.vertical_positioning} - Start: {self.start_position} - End: {self.end_position}"

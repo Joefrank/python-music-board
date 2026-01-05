@@ -17,7 +17,7 @@ from Models.Position import Position
 from Models.Staff import Staff
 from Services.Sound.PianoSoundPlayer import SoundPlayer
 from Services.Utils import StaffUtils
-
+from Configs.music_config import default_note_duration
 
 class ApplicationState:
     """Manages the current state of the application.""" 
@@ -122,12 +122,15 @@ class ApplicationState:
     def get_registered_note_modifier(self):
         return self.note_modifier
     
-    def check_click_around_note(self, position) -> Note:
+    def find_nearest_note_to_position(self, position) -> Note:
         for staff in self.music_score.staves_sequence:
             nearest_note = staff.find_nearest_note(position)
             if nearest_note is not None:
                 return nearest_note
         return None   
+    
+    def find_nearest_staff_item_to_position(self, position) -> Staff:
+        return self.music_score.find_nearest_staff_item(position)
     
     def effect_note_modifier(self, note: Note, modifier):        
         if modifier[1] == 1:
@@ -146,32 +149,38 @@ class ApplicationState:
         self.mouse_hover.set_current_position(new_mouse_position)
         self.mouse_hover.notify()
 
+    """ Registers a mouse click. If a staff item is found near the click position, and there is not a note modifier,
+        we add a note to the staff item as new note. If there is a note modifier, we apply the modifier to the nearest note found.
+    """
     def register_mouse_click_event(self, new_mouse_position):
-        if (new_mouse_position is None or self.note_modifier is None):
+        if new_mouse_position is None: # mouse position must be valid
             return
-         
-        nearest_staff_item = self.music_score.find_nearest_staff_item(new_mouse_position)
-        if nearest_staff_item is None:
-            return
+        # If there is a note modifier, we apply it to the nearest note found
+        if self.note_modifier is not None:
+            nearest_note = self.find_nearest_note_to_position(new_mouse_position)
+            if nearest_note is not None:
+                self.effect_note_modifier(nearest_note, self.note_modifier)
+        # If no note modifier, we try to add a new note to the nearest staff item
+        else:
+            nearest_staff_item = self.music_score.find_nearest_staff_item_to_position(new_mouse_position)
+            if nearest_staff_item is not None: # staff item is either line or interval             
+                self.add_note_to_staff_item(nearest_staff_item, new_mouse_position)
+            else: # just register the click position
+                self.mouse_click.set_current_position(new_mouse_position)
 
-        # add note to this staff item
-        nearest_staff_item.add_note_at_position(new_mouse_position, self.note_duration, self.sound_player.default_velocity)
-        
-        # new_note = self.render_note_at_position(mouse_click_position, staff_item, staff.tempo, staff.velocity)            
-        # #self.draw_note(new_note.duration, staff_item.key_id, 40, 30, new_note.position, color=Color.RED)
-        # self.render_note(new_note, True, Color.RED, Color.GREY)
-        # self.state.set_last_added_note(new_note)
-        # note_key_code = StaffUtils.get_key_code_from_keyid(new_note.key_id)
-        # note_duration, rest_duration = new_note.get_exact_duration()
-        # self.state.sound_player.play_note(note_key_code, note_duration, new_note.velocity, new_note.tempo)
-        # if rest_duration > 0:
-        #     self.state.sound_player.play_note(0, rest_duration, 0, new_note.tempo)  # 0 key_value for rest
-        # self.state.mouse_click.reset_current_position()
-
-        # *** 
         self.mouse_click.set_current_position(new_mouse_position)
         self.mouse_click.notify()
-            
+
+    def add_note_to_staff_item(self, nearest_staff_item, position):
+        note_duration = default_note_duration if self.note_duration is None else self.note_duration
+        new_note = nearest_staff_item.add_note_at_position(position, note_duration)
+        self.set_last_added_note(new_note)
+        note_key_code = StaffUtils.get_key_code_from_keyid(new_note.key_id)
+        note_duration, rest_duration = new_note.get_exact_duration()
+        self.sound_player.play_note(note_key_code, note_duration, new_note.velocity, new_note.tempo)
+        if rest_duration > 0:
+            self.sound_player.play_note(0, rest_duration, 0, new_note.tempo)  # 0 key_value for rest
+    
     def reset_all_actions(self, source_menu_item:MenuItem):
         self.music_score = copy.deepcopy(self.music_score_backup) 
         if source_menu_item is not None:

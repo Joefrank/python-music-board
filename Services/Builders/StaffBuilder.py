@@ -53,14 +53,14 @@ class StaffBuilder:
         #because we are starting to build lines from top to bottom and our key details are
         # from bottom to top, we need to reverse the array.  
         piano_key_details.reverse()  
-
         for i in range(no_of_lines):                 
             line_y = (i * (interval_thickness + line_thickness))
             start_position = Position(original_position.x, original_position.y + line_y)
-            end_position = Position(original_position.x + self.staff_width, original_position.y + line_y)            
+            end_position = Position(original_position.x + self.staff_width, original_position.y + line_y) 
             line_collateral_boundaries = CollateralBoundary(start_position.x + left_collateral_offset,end_position.x - right_collateral_offset)
+            staff_index = len(self.lines) + 1
             line = Line(start_position, end_position, line_thickness, is_virtual, piano_key_details[i][0], piano_key_details[i],
-                         vertical_positioning, (i+1), line_collateral_boundaries)
+                         vertical_positioning, staff_index, line_collateral_boundaries, self.staff.velocity, self.staff.tempo)
             self.lines.append(line)
         
         return self
@@ -94,19 +94,18 @@ class StaffBuilder:
         # because we are starting to build lines from top to bottom and our key details are
         # from bottom to top, we need to reverse the array.       
         piano_key_details.reverse()  
-
         for i in range(no_of_intervals):
             interval_top_y = original_position.y + (i * (interval_thickness + line_thickness))
             interval_y_bottom = interval_top_y + interval_thickness - 1 # remove one cause start position is considered first pixel
-
             position_rect = Rect(Position(original_position.x, interval_top_y),
                                  Position(original_position.x + self.staff_width, interval_top_y),
                              Position(original_position.x + self.staff_width, interval_y_bottom),
-                             Position(original_position.x, interval_y_bottom))
+                             Position(original_position.x, interval_y_bottom))          
             line_collateral_boundaries = CollateralBoundary(original_position.x + left_collateral_offset, original_position.x + 
                                                             self.staff_width - right_collateral_offset)
-            interval = Interval(position_rect, piano_key_details[i][0], piano_key_details[i], is_virtual, vertical_positioning, (i+1),
-                                line_collateral_boundaries)            
+            staff_index = len(self.intervals) + 1 
+            interval = Interval(position_rect, piano_key_details[i][0], piano_key_details[i], is_virtual, vertical_positioning, staff_index,
+                                line_collateral_boundaries, self.staff.velocity, self.staff.tempo)            
             self.intervals.append(interval)
         
         return self

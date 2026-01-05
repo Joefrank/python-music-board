@@ -63,7 +63,19 @@ class Staff:
         shortest_distance, nearest_note = self._find_nearest_in_groups(note_groups, position)
         return nearest_note
 
-
+    """ The nearest staff item to a position is the staff item (line or interval) that contains a note closest to the position. """
+    def find_nearest_item_to_position(self, position):
+       # Collect all staff items from both lines and intervals
+        staff_items = [line for line in self.lines] + \
+                    [interval for interval in self.intervals] + \
+                    [line for line in self.virtual_lines] + \
+                    [interval for interval in self.virtual_intervals]
+        
+        for staff_item in staff_items:
+            if staff_item.mouse_hovering_around(position, StaffConfig.STAFF_ITEM_THRESHOLD):
+                return staff_item
+        return None
+    
     def _find_nearest_in_groups(self, note_groups, position):
         smallest_distance = -1
         nearest_note = None

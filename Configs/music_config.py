@@ -55,7 +55,7 @@ class NoteOptions:
 
 
 valid_note_durations = \
-    [ #(duration, note_type font_code, stem-on/off, Actual duration)
+    [ #(duration, note_type, font_code, stem-on/off, Actual duration)
         ("1","Whole", "\uE0A2",False, NoteDurationInTicks.WHOLE),
         ("2","Half", "\uE0A2", True, NoteDurationInTicks.HALF),
         ("4","Quarter","\uE0A4", True, NoteDurationInTicks.QUARTER),

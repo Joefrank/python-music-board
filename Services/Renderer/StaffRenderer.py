@@ -85,26 +85,9 @@ class StaffRenderer(BaseRenderer):
     """
     def draw_staff_item_collaterals(self, staff_item, staff, nearest_staff=None):
         mouse_over_position = self.state.mouse_hover.get_current_position()
-        mouse_click_position = self.state.mouse_click.get_current_position()
-        
-        # check if it matches this staff item and render note potentially
-        if (mouse_click_position is not None and self.state.note_modifier is None
-            and staff_item.mouse_hovering_around(mouse_click_position, StaffConfig.STAFF_ITEM_THRESHOLD)):            
-            new_note = self.render_note_at_position(mouse_click_position, staff_item, staff.tempo, staff.velocity)            
-            #self.draw_note(new_note.duration, staff_item.key_id, 40, 30, new_note.position, color=Color.RED)
-            self.render_note(new_note, True, Color.RED, Color.GREY)
-            self.state.set_last_added_note(new_note)
-            note_key_code = StaffUtils.get_key_code_from_keyid(new_note.key_id)
-            note_duration, rest_duration = new_note.get_exact_duration()
-            self.state.sound_player.play_note(note_key_code, note_duration, new_note.velocity, new_note.tempo)
-            if rest_duration > 0:
-                self.state.sound_player.play_note(0, rest_duration, 0, new_note.tempo)  # 0 key_value for rest
-            self.state.mouse_click.reset_current_position()
-
         # if staff item has notes, we want to display them.
         if len(staff_item.notes) > 0:
             for note in staff_item.notes:
-
                 note_color = Color.RED if self.state.last_note_added == note else \
                     (Color.BLACK if note.color is None else note.color)
                 #self.draw_note(note.duration, note.key_id, 40, 30, note.position, color=note_color) 
